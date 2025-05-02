@@ -30,9 +30,12 @@ $app->post('/analyze', function (Request $request, Response $response) {
     $url = $parsedBody['url'] ?? '';
 
     // In a real application, we would analyze the URL here
+    $messages = [
+        ['type' => 'info', 'text' => "Analyzing URL: " . htmlspecialchars($url)]
+    ];
 
-    $response->getBody()->write("Analyzing URL: " . htmlspecialchars($url));
-    return $response;
+    $renderer = $this->get('renderer');
+    return $renderer->render($response, 'index.phtml', ['messages' => $messages]);
 });
 
 $app->run();
