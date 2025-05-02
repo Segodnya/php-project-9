@@ -1,0 +1,14 @@
+/vendor/
+/.env
+/.idea
+/.vscode
+/node_modules
+/logs
+*.log
+*.cache
+composer.phar
+.DS_Store
+
+# Docker
+.docker/
+docker-compose.override.yml 

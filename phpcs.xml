@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<ruleset name="PHP_CodeSniffer">
+    <description>The coding standard for PHP Project.</description>
+    <arg name="colors"/>
+    <arg value="p"/>
+
+    <file>public</file>
+    <file>src</file>
+
+    <rule ref="PSR12"/>
+</ruleset> 
