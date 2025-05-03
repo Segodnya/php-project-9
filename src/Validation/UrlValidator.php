@@ -1,10 +1,10 @@
 <?php
 
-namespace App;
+namespace App\Validation;
 
-class Validator
+class UrlValidator
 {
-    public static function validateUrl(string $url): array
+    public function validate(string $url): array
     {
         $errors = [];
 
@@ -23,7 +23,7 @@ class Validator
         return $errors;
     }
 
-    public static function normalizeUrl(string $url): string
+    public function normalize(string $url): string
     {
         $parsedUrl = parse_url($url);
 
@@ -36,4 +36,4 @@ class Validator
 
         return "{$scheme}://{$host}{$port}";
     }
-}
+} 

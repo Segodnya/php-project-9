@@ -1,10 +1,10 @@
 <?php
 
-namespace App;
+namespace App\Services;
 
 use PDO;
 
-class Connection
+class DatabaseConnection
 {
     private static ?PDO $pdo = null;
 
@@ -30,4 +30,4 @@ class Connection
 
         return self::$pdo;
     }
-}
+} 

@@ -136,3 +136,76 @@ Fix linting issues:
 ```bash
 make lint-fix
 ```
+
+## Refactoring Plan
+
+Based on analysis of the current codebase, here is a step-by-step plan to refactor the application for improved maintainability and extensibility:
+
+### 1. Implement MVC Architecture
+
+- **Create directory structure**:
+  - `/src/Controllers` - Handle HTTP requests and responses
+  - `/src/Models` - Data and business logic
+  - `/src/Services` - Business logic services
+  - `/src/Repositories` - Database operations
+  - `/src/Validation` - Input validation rules
+  - `/src/Middleware` - Request/response middleware
+  - `/src/Exceptions` - Custom exception classes
+
+- **Move and refactor code**:
+  - Move all route handlers from `public/index.php` to dedicated controller classes
+  - Create a proper router configuration file
+
+### 2. Implement Dependency Injection
+
+- **Create a Service Container**:
+  - Use PSR-11 compatible container 
+  - Configure services in a dedicated configuration file
+  - Replace direct class instantiation with container resolution
+
+### 3. Improve Database Layer
+
+- **Implement Repository Pattern**:
+  - Create a base Repository interface
+  - Extract common database methods to abstract classes
+  - Implement specific repositories for each entity
+
+- **Implement Entity Objects**:
+  - Create proper entity classes for Url and UrlCheck
+  - Implement getter/setter methods
+  - Add type hints and validation
+
+### 4. Refactor Validator and Analyzer
+
+- **Create dedicated Service classes**:
+  - Move URL validation logic to UrlValidator service
+  - Refactor Analyzer to be more modular and testable
+  - Implement proper exception handling and error messaging
+
+### 5. Implement Proper HTTP Request/Response Handling
+
+- **Use PSR-7 Request/Response objects consistently**:
+  - Create response builders for common response types
+  - Standardize error responses
+
+### 6. Refactor Templates
+
+- **Implement a View Service**:
+  - Create a dedicated service for rendering views
+  - Organize templates by feature
+  - Extract common UI components to partials
+  - Implement view helpers for common UI patterns
+
+### 7. Implement Error Handling
+
+- **Create error handlers**:
+  - Custom exception classes
+  - Dedicated error pages
+  - Proper logging
+
+### 8. Add Unit and Integration Tests
+
+- **Create test structure**:
+  - Unit tests for each component
+  - Integration tests for key features
+  - Database tests with in-memory SQLite
