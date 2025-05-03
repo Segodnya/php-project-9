@@ -13,4 +13,4 @@ class UnauthorizedException extends HttpException
     {
         parent::__construct($message, 401, $code, $previous);
     }
-} 
+}

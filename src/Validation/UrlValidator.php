@@ -13,7 +13,7 @@ class UrlValidator
 
     /**
      * Validate a URL string
-     * 
+     *
      * @param string $url The URL to validate
      * @return bool True if the URL is valid
      * @throws ValidationException If the URL is invalid
@@ -43,7 +43,7 @@ class UrlValidator
 
     /**
      * Normalize a URL by extracting only scheme, host and port
-     * 
+     *
      * @param string $url The URL to normalize
      * @return string The normalized URL
      * @throws ValidationException If the URL cannot be parsed
@@ -68,7 +68,7 @@ class UrlValidator
 
     /**
      * Validates and normalizes a URL in one step
-     * 
+     *
      * @param string $url The URL to process
      * @return string The normalized URL
      * @throws ValidationException If the URL is invalid
@@ -78,4 +78,4 @@ class UrlValidator
         $this->validate($url);
         return $this->normalize($url);
     }
-} 
+}

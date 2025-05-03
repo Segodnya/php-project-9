@@ -27,4 +27,4 @@ class HttpRequestException extends HttpException
     {
         return $this->url;
     }
-} 
+}

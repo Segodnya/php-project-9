@@ -11,4 +11,4 @@ class BadRequestException extends HttpException
     {
         parent::__construct($message, 400, $code, $previous);
     }
-} 
+}

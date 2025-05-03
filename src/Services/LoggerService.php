@@ -17,35 +17,35 @@ use Throwable;
 class LoggerService
 {
     private Logger $logger;
-    
+
     /**
      * Initialize the logger
      */
     public function __construct(string $name = 'app')
     {
         $this->logger = new Logger($name);
-        
+
         // Configure logger based on environment
         $this->configureLogger();
     }
-    
+
     /**
      * Configure the logger with appropriate handlers and processors
      */
     private function configureLogger(): void
     {
         $logDir = dirname(__DIR__, 2) . '/var/logs';
-        
+
         // Make sure log directory exists
         if (!is_dir($logDir)) {
             mkdir($logDir, 0777, true);
         }
-        
+
         // Create the line formatter
         $dateFormat = "Y-m-d H:i:s";
         $output = "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n";
         $formatter = new LineFormatter($output, $dateFormat);
-        
+
         // Add rotating file handler for errors (7 days of logs, only errors and above)
         $errorHandler = new RotatingFileHandler(
             $logDir . '/error.log',
@@ -53,23 +53,23 @@ class LoggerService
             Level::Error
         );
         $errorHandler->setFormatter($formatter);
-        
+
         // Add stream handler for all logs in development
         $debugHandler = new StreamHandler(
             $logDir . '/debug.log',
             $_ENV['APP_ENV'] === 'development' ? Level::Debug : Level::Info
         );
         $debugHandler->setFormatter($formatter);
-        
+
         // Add processors for additional context
         $this->logger->pushProcessor(new IntrospectionProcessor());
         $this->logger->pushProcessor(new WebProcessor());
-        
+
         // Add handlers
         $this->logger->pushHandler($errorHandler);
         $this->logger->pushHandler($debugHandler);
     }
-    
+
     /**
      * Log an emergency message
      */
@@ -77,7 +77,7 @@ class LoggerService
     {
         $this->logger->emergency($message, $context);
     }
-    
+
     /**
      * Log an alert message
      */
@@ -85,7 +85,7 @@ class LoggerService
     {
         $this->logger->alert($message, $context);
     }
-    
+
     /**
      * Log a critical message
      */
@@ -93,7 +93,7 @@ class LoggerService
     {
         $this->logger->critical($message, $context);
     }
-    
+
     /**
      * Log an error message
      */
@@ -101,7 +101,7 @@ class LoggerService
     {
         $this->logger->error($message, $context);
     }
-    
+
     /**
      * Log a warning message
      */
@@ -109,7 +109,7 @@ class LoggerService
     {
         $this->logger->warning($message, $context);
     }
-    
+
     /**
      * Log a notice message
      */
@@ -117,7 +117,7 @@ class LoggerService
     {
         $this->logger->notice($message, $context);
     }
-    
+
     /**
      * Log an info message
      */
@@ -125,7 +125,7 @@ class LoggerService
     {
         $this->logger->info($message, $context);
     }
-    
+
     /**
      * Log a debug message
      */
@@ -133,7 +133,7 @@ class LoggerService
     {
         $this->logger->debug($message, $context);
     }
-    
+
     /**
      * Log an exception with full details
      */
@@ -149,7 +149,7 @@ class LoggerService
                 'trace' => $exception->getTraceAsString()
             ]
         ]);
-        
+
         $this->error('Exception: ' . $exception->getMessage(), $context);
     }
-} 
+}

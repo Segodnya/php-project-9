@@ -13,4 +13,4 @@ class DatabaseException extends ServerErrorException
     {
         parent::__construct($message, $code, $previous);
     }
-} 
+}

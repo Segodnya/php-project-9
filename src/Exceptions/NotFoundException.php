@@ -11,4 +11,4 @@ class NotFoundException extends HttpException
     {
         parent::__construct($message, 404, $code, $previous);
     }
-} 
+}

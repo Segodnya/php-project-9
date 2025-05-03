@@ -32,4 +32,4 @@ abstract class AbstractModel
      * @return array
      */
     abstract public function getValidationErrors(): array;
-} 
+}

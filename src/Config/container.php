@@ -44,12 +44,12 @@ $containerBuilder->addDefinitions(array_merge([
         ];
     },
 
-    // Factory for creating responses
+        // Factory for creating responses
     ResponseFactory::class => function () {
         return new ResponseFactory();
     },
 
-    // Logger service
+        // Logger service
     LoggerService::class => function () {
         return new LoggerService('page-analyzer');
     },
@@ -57,36 +57,36 @@ $containerBuilder->addDefinitions(array_merge([
         return $c->get(LoggerService::class);
     },
 
-    // View service and Twig setup
+        // View service and Twig setup
     Twig::class => function (ContainerInterface $c) {
         $twig = Twig::create(
             __DIR__ . '/../../templates',
             [
-                'cache' => ($_ENV['APP_ENV'] ?? 'development') === 'production' 
-                    ? __DIR__ . '/../../var/cache/twig' 
+                'cache' => ($_ENV['APP_ENV'] ?? 'development') === 'production'
+                    ? __DIR__ . '/../../var/cache/twig'
                     : false,
                 'auto_reload' => true,
                 'debug' => ($_ENV['APP_ENV'] ?? 'development') !== 'production',
             ]
         );
-        
+
         // Add extensions
         $twig->getEnvironment()->addExtension(new ViewHelpers());
-        
+
         // Add flash messages as a global variable
         $flash = $c->get(Messages::class);
         $twig->getEnvironment()->addGlobal('flash', $flash->getMessages());
-        
+
         // Add current path as a global variable
         $twig->getEnvironment()->addGlobal('currentPath', $_SERVER['REQUEST_URI'] ?? '/');
-        
+
         return $twig;
     },
-    
+
     ViewService::class => function (ContainerInterface $c) {
         return new ViewService($c->get(Twig::class));
     },
-    
+
     // The TwigMiddleware factory now returns a factory function that takes an App instance
     // This breaks the circular dependency
     'twig-middleware-factory' => function (ContainerInterface $c) {
@@ -94,8 +94,8 @@ $containerBuilder->addDefinitions(array_merge([
             return TwigMiddleware::createFromContainer($app, Twig::class);
         };
     },
-    
-    // Legacy PhpRenderer for backward compatibility during transition
+
+        // Legacy PhpRenderer for backward compatibility during transition
     PhpRenderer::class => function () {
         $phpView = new PhpRenderer(__DIR__ . '/../../templates');
         $phpView->setLayout('layout.phtml');
@@ -105,7 +105,7 @@ $containerBuilder->addDefinitions(array_merge([
         return $c->get(PhpRenderer::class);
     },
 
-    // Response builder
+        // Response builder
     ResponseBuilder::class => function (ContainerInterface $c) {
         return new ResponseBuilder(
             $c->get(ResponseFactory::class),
@@ -113,12 +113,12 @@ $containerBuilder->addDefinitions(array_merge([
         );
     },
 
-    // Request handler
+        // Request handler
     RequestHandler::class => function () {
         return new RequestHandler();
     },
 
-    // Error handler middleware
+        // Error handler middleware
     ErrorHandlerMiddleware::class => function (ContainerInterface $c) {
         return new ErrorHandlerMiddleware(
             $c->get(ResponseBuilder::class),
@@ -127,7 +127,7 @@ $containerBuilder->addDefinitions(array_merge([
         );
     },
 
-    // Flash messages
+        // Flash messages
     Messages::class => function () {
         return new Messages();
     },
@@ -148,13 +148,13 @@ $containerBuilder->addDefinitions(array_merge([
         return $c->get('PDO');
     },
 
-    // Use our App\PDO wrapper class that proxies to the real PDO
+        // Use our App\PDO wrapper class that proxies to the real PDO
     AppPDO::class => function (ContainerInterface $c) {
         $pdo = $c->get('PDO');
         return AppPDO::fromPdo($pdo);
     },
 
-    // Repositories
+        // Repositories
     UrlRepository::class => function (ContainerInterface $c) {
         // Use the App\PDO class for repository constructor
         return new UrlRepository($c->get(AppPDO::class));
@@ -171,7 +171,7 @@ $containerBuilder->addDefinitions(array_merge([
         return $c->get(UrlCheckRepository::class);
     },
 
-    // Services
+        // Services
     Analyzer::class => function () {
         return new Analyzer();
     },
@@ -179,7 +179,7 @@ $containerBuilder->addDefinitions(array_merge([
         return $c->get(Analyzer::class);
     },
 
-    // Validators
+        // Validators
     UrlValidator::class => function () {
         return new UrlValidator();
     }

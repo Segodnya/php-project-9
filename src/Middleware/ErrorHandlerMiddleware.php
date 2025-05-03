@@ -51,7 +51,7 @@ class ErrorHandlerMiddleware implements MiddlewareInterface
                 'path' => $request->getUri()->getPath(),
                 'method' => $request->getMethod(),
             ]);
-            
+
             // Handle 404 Not Found exceptions - from our custom exception or Slim's exception
             return $this->responseBuilder->error(
                 $exception->getMessage(),
@@ -64,7 +64,7 @@ class ErrorHandlerMiddleware implements MiddlewareInterface
                 'path' => $request->getUri()->getPath(),
                 'method' => $request->getMethod(),
             ]);
-            
+
             // Return a 401 Unauthorized response
             return $this->responseBuilder->error(
                 $exception->getMessage(),
@@ -77,7 +77,7 @@ class ErrorHandlerMiddleware implements MiddlewareInterface
                 'path' => $request->getUri()->getPath(),
                 'method' => $request->getMethod(),
             ]);
-            
+
             // Return a 403 Forbidden response
             return $this->responseBuilder->error(
                 $exception->getMessage(),
@@ -91,16 +91,16 @@ class ErrorHandlerMiddleware implements MiddlewareInterface
                 'method' => $request->getMethod(),
                 'status_code' => $exception->getStatusCode(),
             ]);
-            
+
             // Handle HTTP exceptions with their specific status codes
             $statusCode = $exception->getStatusCode();
-            
+
             // Determine the appropriate template based on status code
             $template = 'errors/error.twig';
             if (file_exists(dirname(__DIR__, 2) . '/templates/errors/' . $statusCode . '.twig')) {
                 $template = 'errors/' . $statusCode . '.twig';
             }
-            
+
             return $this->responseBuilder->error(
                 $exception->getMessage(),
                 $statusCode,
@@ -113,7 +113,7 @@ class ErrorHandlerMiddleware implements MiddlewareInterface
                 'method' => $request->getMethod(),
                 'errors' => $exception->getErrors(),
             ]);
-            
+
             // Handle validation exceptions with custom template if provided
             $template = $exception->getTemplate() ?: 'home/index.twig';
             return $this->responseBuilder->validationError($exception->getErrors(), $template);
@@ -123,12 +123,12 @@ class ErrorHandlerMiddleware implements MiddlewareInterface
                 'path' => $request->getUri()->getPath(),
                 'method' => $request->getMethod(),
             ]);
-            
+
             // Return a standardized server error response
             $message = $this->displayErrors
                 ? $exception->getMessage()
                 : 'A database error occurred. Please try again later.';
-                
+
             return $this->responseBuilder->error($message, 500, 'errors/500.twig');
         } catch (ExternalServiceException $exception) {
             // Log external service errors
@@ -137,12 +137,12 @@ class ErrorHandlerMiddleware implements MiddlewareInterface
                 'method' => $request->getMethod(),
                 'service' => $exception->getServiceName(),
             ]);
-            
+
             // Return an appropriate error response
             $message = $this->displayErrors
                 ? sprintf('Error in external service %s: %s', $exception->getServiceName(), $exception->getMessage())
                 : 'An error occurred while communicating with an external service. Please try again later.';
-                
+
             return $this->responseBuilder->error($message, $exception->getStatusCode(), 'errors/error.twig');
         } catch (Throwable $exception) {
             // Log the full exception details
@@ -160,4 +160,4 @@ class ErrorHandlerMiddleware implements MiddlewareInterface
             return $this->responseBuilder->error($message, 500, 'errors/500.twig');
         }
     }
-} 
+}

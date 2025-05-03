@@ -10,7 +10,7 @@ use App\Exceptions\HttpException;
 class ExternalServiceException extends HttpException
 {
     private string $serviceName;
-    
+
     public function __construct(
         string $message = 'External service error',
         string $serviceName = 'unknown',
@@ -21,7 +21,7 @@ class ExternalServiceException extends HttpException
         $this->serviceName = $serviceName;
         parent::__construct($message, $statusCode, $code, $previous);
     }
-    
+
     /**
      * Get the name of the external service that failed
      */
@@ -29,4 +29,4 @@ class ExternalServiceException extends HttpException
     {
         return $this->serviceName;
     }
-} 
+}

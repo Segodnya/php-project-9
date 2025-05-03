@@ -46,7 +46,7 @@ class ResponseBuilder
         $response = $this->responseFactory->createResponse($status);
         $response = $response->withHeader('Content-Type', 'application/json');
         $response->getBody()->write(json_encode($data));
-        
+
         return $response;
     }
 
@@ -147,4 +147,4 @@ class ResponseBuilder
     {
         return $this->view($template, ['errors' => $errors], 422);
     }
-} 
+}

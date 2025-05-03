@@ -22,13 +22,13 @@ class DatabaseConnection
             if (!isset($_ENV['DATABASE_URL'])) {
                 throw new InvalidArgumentException('DATABASE_URL environment variable is not set');
             }
-            
+
             self::$pdo = DatabaseFactory::createFromUrl($_ENV['DATABASE_URL']);
         }
 
         return self::$pdo;
     }
-    
+
     /**
      * Reset the connection (for testing purposes)
      *
@@ -38,4 +38,4 @@ class DatabaseConnection
     {
         self::$pdo = null;
     }
-} 
+}

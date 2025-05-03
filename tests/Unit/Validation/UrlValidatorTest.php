@@ -37,7 +37,7 @@ class UrlValidatorTest extends TestCase
     public function testTooLongUrlThrowsException(): void
     {
         $longUrl = 'https://example.com/' . str_repeat('a', UrlValidator::MAX_URL_LENGTH);
-        
+
         $this->expectException(ValidationException::class);
         $this->validator->validate($longUrl);
     }
@@ -46,7 +46,7 @@ class UrlValidatorTest extends TestCase
     {
         $url = 'https://example.com/path?query=string';
         $normalized = $this->validator->normalize($url);
-        
+
         $this->assertEquals('https://example.com', $normalized);
     }
 
@@ -54,7 +54,7 @@ class UrlValidatorTest extends TestCase
     {
         $url = 'https://example.com:8080/path';
         $normalized = $this->validator->normalize($url);
-        
+
         $this->assertEquals('https://example.com:8080', $normalized);
     }
 
@@ -62,7 +62,7 @@ class UrlValidatorTest extends TestCase
     {
         $url = '//example.com';
         $normalized = $this->validator->normalize($url);
-        
+
         $this->assertEquals('http://example.com', $normalized);
     }
 
@@ -76,7 +76,7 @@ class UrlValidatorTest extends TestCase
     {
         $url = 'https://example.com/path?query=string';
         $result = $this->validator->validateAndNormalize($url);
-        
+
         $this->assertEquals('https://example.com', $result);
     }
 
@@ -85,4 +85,4 @@ class UrlValidatorTest extends TestCase
         $this->expectException(ValidationException::class);
         $this->validator->validateAndNormalize('invalid-url');
     }
-} 
+}

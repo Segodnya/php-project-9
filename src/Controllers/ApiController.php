@@ -54,4 +54,4 @@ class ApiController extends Controller
 
         return $this->responseBuilder->apiSuccess(['urls' => $urls]);
     }
-} 
+}

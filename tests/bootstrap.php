@@ -19,4 +19,4 @@ if (!isset($_ENV['DATABASE_URL'])) {
 // If you need to create a temporary PostgreSQL schema, you would do that here
 
 // Initialize test helpers and utilities
-require_once __DIR__ . '/TestCase.php'; 
+require_once __DIR__ . '/TestCase.php';

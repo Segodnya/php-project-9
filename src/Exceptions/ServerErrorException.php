@@ -11,4 +11,4 @@ class ServerErrorException extends HttpException
     {
         parent::__construct($message, 500, $code, $previous);
     }
-} 
+}

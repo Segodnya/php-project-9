@@ -75,4 +75,4 @@ abstract class Controller
     {
         return $this->container->get(Analyzer::class);
     }
-} 
+}

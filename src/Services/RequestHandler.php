@@ -22,15 +22,15 @@ class RequestHandler
     public function getRequiredParam(Request $request, string $key, string $message = null): mixed
     {
         $body = $request->getParsedBody();
-        
+
         if (!is_array($body) || !array_key_exists($key, $body)) {
             $errorMessage = $message ?: "Required parameter '$key' is missing";
             throw new BadRequestException($errorMessage);
         }
-        
+
         return $body[$key];
     }
-    
+
     /**
      * Get an optional parameter from the request body
      *
@@ -42,14 +42,14 @@ class RequestHandler
     public function getParam(Request $request, string $key, mixed $default = null): mixed
     {
         $body = $request->getParsedBody();
-        
+
         if (!is_array($body) || !array_key_exists($key, $body)) {
             return $default;
         }
-        
+
         return $body[$key];
     }
-    
+
     /**
      * Get a required query parameter
      *
@@ -62,15 +62,15 @@ class RequestHandler
     public function getRequiredQueryParam(Request $request, string $key, string $message = null): string
     {
         $params = $request->getQueryParams();
-        
+
         if (!array_key_exists($key, $params)) {
             $errorMessage = $message ?: "Required query parameter '$key' is missing";
             throw new BadRequestException($errorMessage);
         }
-        
+
         return $params[$key];
     }
-    
+
     /**
      * Get an optional query parameter
      *
@@ -82,14 +82,14 @@ class RequestHandler
     public function getQueryParam(Request $request, string $key, mixed $default = null): mixed
     {
         $params = $request->getQueryParams();
-        
+
         if (!array_key_exists($key, $params)) {
             return $default;
         }
-        
+
         return $params[$key];
     }
-    
+
     /**
      * Get all request data from the request body
      *
@@ -101,4 +101,4 @@ class RequestHandler
         $body = $request->getParsedBody();
         return is_array($body) ? $body : [];
     }
-} 
+}

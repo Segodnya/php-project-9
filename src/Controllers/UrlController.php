@@ -34,11 +34,11 @@ class UrlController extends Controller
     {
         $data = $request->getParsedBody();
         $url = $data['url']['name'] ?? '';
-        
+
         try {
             $validator = $this->container->get(UrlValidator::class);
             $normalizedUrl = $validator->validateAndNormalize($url);
-            
+
             $existingUrl = $this->getUrlRepository()->findByName($normalizedUrl);
 
             if ($existingUrl) {
@@ -75,4 +75,4 @@ class UrlController extends Controller
 
         return $this->responseBuilder->view('urls/show.twig', $params);
     }
-} 
+}

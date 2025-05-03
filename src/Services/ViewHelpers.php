@@ -87,4 +87,4 @@ class ViewHelpers extends AbstractExtension
 
         return sprintf('<span class="badge %s">%d</span>', $class, $statusCode);
     }
-} 
+}

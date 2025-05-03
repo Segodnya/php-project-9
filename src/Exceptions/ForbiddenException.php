@@ -13,4 +13,4 @@ class ForbiddenException extends HttpException
     {
         parent::__construct($message, 403, $code, $previous);
     }
-} 
+}

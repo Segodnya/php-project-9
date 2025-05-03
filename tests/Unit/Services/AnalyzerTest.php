@@ -102,14 +102,14 @@ class AnalyzerTest extends TestCase
     public function testRequestError(): void
     {
         $response = new Response(404);
-        
+
         $this->mockClient->shouldReceive('get')
             ->once()
             ->with('https://example.com')
             ->andThrow(new RequestException('Not Found', new Request('GET', 'https://example.com'), $response));
 
         $this->expectException(HttpRequestException::class);
-        
+
         $this->analyzer->analyze('https://example.com');
     }
-} 
+}

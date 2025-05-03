@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Models\AbstractModel;
 use App\PDO;
 use InvalidArgumentException;
 
@@ -13,12 +12,12 @@ abstract class BaseRepository implements RepositoryInterface
 {
     protected PDO $pdo;
     protected string $table;
-    
+
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
     }
-    
+
     /**
      * Find an entity by its ID
      *
@@ -30,11 +29,11 @@ abstract class BaseRepository implements RepositoryInterface
         $sql = "SELECT * FROM {$this->table} WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['id' => $id]);
-        
+
         $result = $stmt->fetch();
         return $result ?: null;
     }
-    
+
     /**
      * Find all entities
      *
@@ -45,10 +44,10 @@ abstract class BaseRepository implements RepositoryInterface
         $sql = "SELECT * FROM {$this->table} ORDER BY id DESC";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();
-        
+
         return $stmt->fetchAll();
     }
-    
+
     /**
      * Update an existing entity
      *
@@ -61,19 +60,19 @@ abstract class BaseRepository implements RepositoryInterface
         if (empty($data)) {
             return false;
         }
-        
+
         $fields = array_map(function ($field) {
             return "{$field} = :{$field}";
         }, array_keys($data));
-        
+
         $sql = "UPDATE {$this->table} SET " . implode(', ', $fields) . " WHERE id = :id";
-        
+
         $data['id'] = $id;
         $stmt = $this->pdo->prepare($sql);
-        
+
         return $stmt->execute($data);
     }
-    
+
     /**
      * Delete an entity
      *
@@ -84,10 +83,10 @@ abstract class BaseRepository implements RepositoryInterface
     {
         $sql = "DELETE FROM {$this->table} WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
-        
+
         return $stmt->execute(['id' => $id]);
     }
-    
+
     /**
      * Create a new entity from an entity object
      *
@@ -102,10 +101,10 @@ abstract class BaseRepository implements RepositoryInterface
                 'Entity validation failed: ' . json_encode($entity->getValidationErrors())
             );
         }
-        
+
         return $this->create($entity->toArray());
     }
-    
+
     /**
      * Create a new entity from data
      *
@@ -113,7 +112,7 @@ abstract class BaseRepository implements RepositoryInterface
      * @return int The newly created entity ID
      */
     abstract public function create(array $data): int;
-    
+
     /**
      * Find an entity by ID and return as an entity object
      *
@@ -121,11 +120,11 @@ abstract class BaseRepository implements RepositoryInterface
      * @return \App\Models\AbstractModel|null
      */
     abstract public function findByIdAsEntity(int $id): ?\App\Models\AbstractModel;
-    
+
     /**
      * Find all entities and return as entity objects
      * 
      * @return \App\Models\AbstractModel[]
      */
     abstract public function findAllAsEntities(): array;
-} 
+}

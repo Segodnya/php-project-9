@@ -63,4 +63,4 @@ class ViewService
     {
         $this->twig->getEnvironment()->addGlobal($name, $value);
     }
-} 
+}

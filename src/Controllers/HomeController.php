@@ -15,4 +15,4 @@ class HomeController extends Controller
 
         return $this->responseBuilder->view('home/index.twig', $params);
     }
-} 
+}

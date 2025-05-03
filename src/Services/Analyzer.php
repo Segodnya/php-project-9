@@ -16,7 +16,7 @@ class Analyzer
 
     /**
      * Create a new Analyzer instance
-     * 
+     *
      * @param array $clientOptions Optional Guzzle client options
      */
     public function __construct(array $clientOptions = [])
@@ -27,13 +27,13 @@ class Analyzer
             'http_errors' => true,
             'allow_redirects' => true
         ], $clientOptions);
-        
+
         $this->client = new Client($this->clientOptions);
     }
 
     /**
      * Set a custom HTTP client for testing
-     * 
+     *
      * @param Client $client The client to use
      * @return self
      */
@@ -45,7 +45,7 @@ class Analyzer
 
     /**
      * Analyze a URL and extract key SEO data
-     * 
+     *
      * @param string $url The URL to analyze
      * @return array The analysis results
      * @throws HttpRequestException If the request fails
@@ -55,7 +55,7 @@ class Analyzer
         try {
             $response = $this->client->get($url);
             $statusCode = $response->getStatusCode();
-            
+
             $result = [
                 'status_code' => $statusCode
             ];
@@ -96,7 +96,7 @@ class Analyzer
 
     /**
      * Parse HTML content from response and extract SEO data
-     * 
+     *
      * @param ResponseInterface $response The HTTP response
      * @param array &$result The result array to populate
      * @return void
@@ -104,21 +104,21 @@ class Analyzer
     private function parseHtmlContent(ResponseInterface $response, array &$result): void
     {
         $body = (string) $response->getBody();
-        
+
         // Skip parsing if body is empty
         if (empty($body)) {
             return;
         }
-        
+
         try {
             $document = new Document($body);
-            
+
             // Extract h1 tag content
             $result['h1'] = $this->extractH1($document);
-            
+
             // Extract title tag content
             $result['title'] = $this->extractTitle($document);
-            
+
             // Extract meta description content
             $result['description'] = $this->extractDescription($document);
         } catch (\Exception $e) {
@@ -129,7 +129,7 @@ class Analyzer
 
     /**
      * Extract H1 content from the document
-     * 
+     *
      * @param Document $document The DiDom document
      * @return string|null The H1 content or null
      */
@@ -141,7 +141,7 @@ class Analyzer
 
     /**
      * Extract title content from the document
-     * 
+     *
      * @param Document $document The DiDom document
      * @return string|null The title content or null
      */
@@ -153,7 +153,7 @@ class Analyzer
 
     /**
      * Extract meta description from the document
-     * 
+     *
      * @param Document $document The DiDom document
      * @return string|null The description content or null
      */
@@ -162,4 +162,4 @@ class Analyzer
         $element = $document->first('meta[name="description"]');
         return $element ? $element->getAttribute('content') : null;
     }
-} 
+}
