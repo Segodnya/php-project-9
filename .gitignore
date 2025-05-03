@@ -8,7 +8,14 @@
 *.cache
 composer.phar
 .DS_Store
+.phpunit.result.cache
+*.swp
+*.swo
 
 # Docker
 .docker/
-docker-compose.override.yml 
+docker-compose.override.yml
+
+# Cache directory
+/var/cache/
+/var/cache/proxies/ 

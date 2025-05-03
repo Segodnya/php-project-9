@@ -16,7 +16,7 @@ Page Analyzer is available at [https://php-project-9-zfib.onrender.com/](https:/
 
 ## Installation
 
-### Local Installation (requires PHP 8.1+ and PostgreSQL)
+### Local Installation (requires PHP 8.4.6 and PostgreSQL)
 
 ```bash
 git clone https://github.com/Segodnya/php-project-9.git
@@ -39,7 +39,7 @@ make docker-build
 
 ## Usage
 
-### Running Locally (requires PHP 8.1+ and PostgreSQL)
+### Running Locally (requires PHP 8.4.6 and PostgreSQL)
 
 ```bash
 # Make sure your PostgreSQL server is running
@@ -140,28 +140,6 @@ make lint-fix
 ## Refactoring Plan
 
 Based on analysis of the current codebase, here is a step-by-step plan to refactor the application for improved maintainability and extensibility:
-
-### 1. Implement MVC Architecture
-
-- **Create directory structure**:
-  - `/src/Controllers` - Handle HTTP requests and responses
-  - `/src/Models` - Data and business logic
-  - `/src/Services` - Business logic services
-  - `/src/Repositories` - Database operations
-  - `/src/Validation` - Input validation rules
-  - `/src/Middleware` - Request/response middleware
-  - `/src/Exceptions` - Custom exception classes
-
-- **Move and refactor code**:
-  - Move all route handlers from `public/index.php` to dedicated controller classes
-  - Create a proper router configuration file
-
-### 2. Implement Dependency Injection
-
-- **Create a Service Container**:
-  - Use PSR-11 compatible container 
-  - Configure services in a dedicated configuration file
-  - Replace direct class instantiation with container resolution
 
 ### 3. Improve Database Layer
 

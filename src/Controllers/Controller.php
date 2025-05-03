@@ -3,38 +3,49 @@
 namespace App\Controllers;
 
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+use App\Repositories\UrlRepository;
+use App\Repositories\UrlCheckRepository;
+use App\Services\Analyzer;
+use Slim\Views\PhpRenderer;
+use Slim\Flash\Messages;
 
 abstract class Controller
 {
-    protected $container;
+    protected ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
     }
 
-    protected function render($response, $template, $data = [])
+    protected function render(ResponseInterface $response, string $template, array $data = []): ResponseInterface
     {
-        return $this->container->get('renderer')->render($response, $template, $data);
+        return $this->getRenderer()->render($response, $template, $data);
     }
 
-    protected function flash()
+    protected function getRenderer(): PhpRenderer
     {
-        return $this->container->get('flash');
+        return $this->container->get(PhpRenderer::class);
     }
 
-    protected function urlRepository()
+    protected function getFlash(): Messages
     {
-        return $this->container->get('url_repository');
+        return $this->container->get(Messages::class);
     }
 
-    protected function urlCheckRepository()
+    protected function getUrlRepository(): UrlRepository
     {
-        return $this->container->get('url_check_repository');
+        return $this->container->get(UrlRepository::class);
     }
 
-    protected function analyzer()
+    protected function getUrlCheckRepository(): UrlCheckRepository
     {
-        return $this->container->get('analyzer');
+        return $this->container->get(UrlCheckRepository::class);
+    }
+
+    protected function getAnalyzer(): Analyzer
+    {
+        return $this->container->get(Analyzer::class);
     }
 } 

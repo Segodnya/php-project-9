@@ -5,66 +5,43 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Slim\Factory\AppFactory;
-use Slim\Views\PhpRenderer;
-use Slim\Flash\Messages;
-use DI\Container;
-use App\Services\DatabaseConnection;
-use App\Repositories\UrlRepository;
-use App\Repositories\UrlCheckRepository;
-use App\Services\Analyzer;
+use App\App;
+use DI\NotFoundException;
+use DI\DependencyException;
 
+// Start session
 session_start();
 
-// Load environment variables
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
 try {
-    $dotenv->load();
-} catch (\Dotenv\Exception\InvalidPathException $e) {
-    // No .env file, continue with default environment
+    // Create and run the application
+    $app = new App();
+    $app->run();
+} catch (NotFoundException $e) {
+    // Handle container resolution errors (most likely due to missing classes/dependencies)
+    http_response_code(500);
+    echo "<h1>Dependency Injection Error</h1>";
+    echo "<p>An error occurred while resolving a dependency:</p>";
+    echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
+    echo "<p>Check your container configuration.</p>";
+    
+    // Log the error
+    error_log('Container Resolution Error: ' . $e->getMessage());
+} catch (DependencyException $e) {
+    // Handle dependency errors
+    http_response_code(500);
+    echo "<h1>Dependency Injection Error</h1>";
+    echo "<p>An error occurred with dependency injection:</p>";
+    echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
+    
+    // Log the error
+    error_log('Dependency Injection Error: ' . $e->getMessage());
+} catch (Exception $e) {
+    // Handle all other exceptions
+    http_response_code(500);
+    echo "<h1>Application Error</h1>";
+    echo "<p>An unexpected error occurred:</p>";
+    echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
+    
+    // Log the error
+    error_log('Unexpected Application Error: ' . $e->getMessage());
 }
-
-// Create Container
-$container = new Container();
-
-// Configure the renderer with the layout
-$container->set('renderer', function () {
-    // Create a new PhpRenderer instance with the templates directory
-    $phpView = new PhpRenderer(__DIR__ . '/../templates');
-
-    // Explicitly set the layout file to use for all templates
-    $phpView->setLayout('layout.phtml');
-
-    return $phpView;
-});
-
-$container->set('flash', function () {
-    return new Messages();
-});
-
-$container->set('pdo', function () {
-    return DatabaseConnection::get();
-});
-
-$container->set('url_repository', function ($c) {
-    return new UrlRepository($c->get('pdo'));
-});
-
-$container->set('url_check_repository', function ($c) {
-    return new UrlCheckRepository($c->get('pdo'));
-});
-
-$container->set('analyzer', function () {
-    return new Analyzer();
-});
-
-// Create App with Container
-AppFactory::setContainer($container);
-$app = AppFactory::create();
-$app->addErrorMiddleware(true, true, true);
-
-// Register routes
-$routes = require __DIR__ . '/../src/Routes/web.php';
-$routes($app);
-
-$app->run();

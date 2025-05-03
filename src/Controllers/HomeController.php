@@ -9,7 +9,7 @@ class HomeController extends Controller
 {
     public function index(Request $request, Response $response): Response
     {
-        $flash = $this->flash()->getMessages();
+        $flash = $this->getFlash()->getMessages();
         $params = [
             'flash' => $flash,
             'title' => 'Анализатор страниц'

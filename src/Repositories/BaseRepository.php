@@ -2,7 +2,8 @@
 
 namespace App\Repositories;
 
-use PDO;
+// Import our PDO wrapper class
+use App\PDO;
 
 abstract class BaseRepository implements RepositoryInterface
 {

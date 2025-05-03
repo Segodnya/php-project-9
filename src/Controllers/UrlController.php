@@ -10,11 +10,11 @@ class UrlController extends Controller
 {
     public function index(Request $request, Response $response): Response
     {
-        $urls = $this->urlRepository()->findAll();
+        $urls = $this->getUrlRepository()->findAll();
 
         // Add the latest check data to each URL
         foreach ($urls as &$url) {
-            $latestCheck = $this->urlCheckRepository()->findLatestByUrlId($url['id']);
+            $latestCheck = $this->getUrlCheckRepository()->findLatestByUrlId($url['id']);
             if ($latestCheck) {
                 $url['last_check_created_at'] = $latestCheck['created_at'];
                 $url['last_check_status_code'] = $latestCheck['status_code'];
@@ -23,7 +23,7 @@ class UrlController extends Controller
 
         $params = [
             'urls' => $urls,
-            'flash' => $this->flash()->getMessages(),
+            'flash' => $this->getFlash()->getMessages(),
             'title' => 'Сайты'
         ];
 
@@ -35,31 +35,31 @@ class UrlController extends Controller
         $data = $request->getParsedBody();
         $url = $data['url']['name'] ?? '';
         
-        $validator = new UrlValidator();
+        $validator = $this->container->get(UrlValidator::class);
         $errors = $validator->validate($url);
 
         if (!empty($errors)) {
-            $this->flash()->addMessage('danger', implode(', ', $errors));
+            $this->getFlash()->addMessage('danger', implode(', ', $errors));
             $params = [
                 'errors' => ['url' => implode(', ', $errors)],
-                'flash' => $this->flash()->getMessages(),
+                'flash' => $this->getFlash()->getMessages(),
                 'title' => 'Анализатор страниц'
             ];
             return $this->render($response->withStatus(422), 'index.phtml', $params);
         }
 
         $normalizedUrl = $validator->normalize($url);
-        $existingUrl = $this->urlRepository()->findByName($normalizedUrl);
+        $existingUrl = $this->getUrlRepository()->findByName($normalizedUrl);
 
         if ($existingUrl) {
-            $this->flash()->addMessage('info', 'Страница уже существует');
+            $this->getFlash()->addMessage('info', 'Страница уже существует');
             return $response->withHeader('Location', '/urls/' . $existingUrl['id'])
                 ->withStatus(302);
         }
 
-        $id = $this->urlRepository()->create(['name' => $normalizedUrl]);
+        $id = $this->getUrlRepository()->create(['name' => $normalizedUrl]);
 
-        $this->flash()->addMessage('success', 'Страница успешно добавлена');
+        $this->getFlash()->addMessage('success', 'Страница успешно добавлена');
         return $response->withHeader('Location', '/urls/' . $id)
             ->withStatus(302);
     }
@@ -67,20 +67,20 @@ class UrlController extends Controller
     public function show(Request $request, Response $response, array $args): Response
     {
         $id = (int) $args['id'];
-        $url = $this->urlRepository()->findById($id);
+        $url = $this->getUrlRepository()->findById($id);
 
         if (!$url) {
-            $this->flash()->addMessage('danger', 'Страница не найдена');
+            $this->getFlash()->addMessage('danger', 'Страница не найдена');
             return $response->withHeader('Location', '/urls')
                 ->withStatus(302);
         }
 
-        $checks = $this->urlCheckRepository()->findByUrlId($id);
+        $checks = $this->getUrlCheckRepository()->findByUrlId($id);
 
         $params = [
             'url' => $url,
             'checks' => $checks,
-            'flash' => $this->flash()->getMessages(),
+            'flash' => $this->getFlash()->getMessages(),
             'title' => 'Сайт ' . $url['name']
         ];
 

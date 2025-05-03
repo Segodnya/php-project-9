@@ -10,16 +10,16 @@ class UrlCheckController extends Controller
     public function store(Request $request, Response $response, array $args): Response
     {
         $id = (int) $args['id'];
-        $url = $this->urlRepository()->findById($id);
+        $url = $this->getUrlRepository()->findById($id);
 
         if (!$url) {
-            $this->flash()->addMessage('danger', 'Страница не найдена');
+            $this->getFlash()->addMessage('danger', 'Страница не найдена');
             return $response->withHeader('Location', '/urls')
                 ->withStatus(302);
         }
 
         try {
-            $checkData = $this->analyzer()->analyze($url['name']);
+            $checkData = $this->getAnalyzer()->analyze($url['name']);
             
             // Create an array of data instead of passing individual parameters
             $data = [
@@ -30,11 +30,11 @@ class UrlCheckController extends Controller
                 'description' => $checkData['description'] ?? null
             ];
             
-            $this->urlCheckRepository()->create($data);
+            $this->getUrlCheckRepository()->create($data);
 
-            $this->flash()->addMessage('success', 'Страница успешно проверена');
+            $this->getFlash()->addMessage('success', 'Страница успешно проверена');
         } catch (\Exception $e) {
-            $this->flash()->addMessage('danger', 'Произошла ошибка при проверке: ' . $e->getMessage());
+            $this->getFlash()->addMessage('danger', 'Произошла ошибка при проверке: ' . $e->getMessage());
         }
 
         return $response->withHeader('Location', '/urls/' . $id)

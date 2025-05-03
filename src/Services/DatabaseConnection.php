@@ -2,32 +2,40 @@
 
 namespace App\Services;
 
-use PDO;
+// Use fully qualified name for PDO
+use \PDO;
+use InvalidArgumentException;
 
 class DatabaseConnection
 {
-    private static ?PDO $pdo = null;
+    private static ?\PDO $pdo = null;
 
-    public static function get(): PDO
+    /**
+     * Get a PDO connection instance
+     *
+     * @return \PDO
+     * @throws InvalidArgumentException
+     */
+    public static function get(): \PDO
     {
         if (self::$pdo === null) {
-            $databaseUrl = parse_url($_ENV['DATABASE_URL']);
-            $username = $databaseUrl['user'];
-            $password = $databaseUrl['pass'];
-            $host = $databaseUrl['host'];
-            $port = $databaseUrl['port'];
-            $dbName = ltrim($databaseUrl['path'], '/');
-
-            $dsn = "pgsql:host={$host};port={$port};dbname={$dbName}";
-            $options = [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ];
-
-            self::$pdo = new PDO($dsn, $username, $password, $options);
+            if (!isset($_ENV['DATABASE_URL'])) {
+                throw new InvalidArgumentException('DATABASE_URL environment variable is not set');
+            }
+            
+            self::$pdo = DatabaseFactory::createFromUrl($_ENV['DATABASE_URL']);
         }
 
         return self::$pdo;
+    }
+    
+    /**
+     * Reset the connection (for testing purposes)
+     *
+     * @return void
+     */
+    public static function reset(): void
+    {
+        self::$pdo = null;
     }
 } 
