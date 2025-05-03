@@ -1,5 +1,5 @@
 PORT ?= 8000
-DB_URL ?= postgresql://janedoe:mypassword@localhost:5432/mydb
+DB_URL ?= postgresql://postgres:mypassword@localhost:5432/mydb
 
 install:
 	composer install
