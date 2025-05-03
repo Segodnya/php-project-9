@@ -141,18 +141,6 @@ make lint-fix
 
 Based on analysis of the current codebase, here is a step-by-step plan to refactor the application for improved maintainability and extensibility:
 
-### 3. Improve Database Layer
-
-- **Implement Repository Pattern**:
-  - Create a base Repository interface
-  - Extract common database methods to abstract classes
-  - Implement specific repositories for each entity
-
-- **Implement Entity Objects**:
-  - Create proper entity classes for Url and UrlCheck
-  - Implement getter/setter methods
-  - Add type hints and validation
-
 ### 4. Refactor Validator and Analyzer
 
 - **Create dedicated Service classes**:

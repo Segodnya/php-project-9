@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
-class Url
+use DateTime;
+
+class Url extends AbstractModel
 {
     private ?int $id = null;
     private string $name;
     private ?string $createdAt = null;
+    private array $validationErrors = [];
     
     public function __construct(string $name)
     {
@@ -46,12 +49,22 @@ class Url
         return $this;
     }
     
+    public function getFormattedCreatedAt(string $format = 'Y-m-d H:i:s'): ?string
+    {
+        if (!$this->createdAt) {
+            return null;
+        }
+        
+        $date = new DateTime($this->createdAt);
+        return $date->format($format);
+    }
+    
     public static function fromArray(array $data): self
     {
         $url = new self($data['name']);
         
         if (isset($data['id'])) {
-            $url->setId($data['id']);
+            $url->setId((int) $data['id']);
         }
         
         if (isset($data['created_at'])) {
@@ -68,5 +81,45 @@ class Url
             'name' => $this->name,
             'created_at' => $this->createdAt
         ];
+    }
+
+    /**
+     * Validate the URL
+     *
+     * @return bool
+     */
+    public function validate(): bool
+    {
+        $this->validationErrors = [];
+        
+        // Check if name is not empty
+        if (empty($this->name)) {
+            $this->validationErrors['name'] = 'URL cannot be empty';
+            return false;
+        }
+        
+        // Check if name is a valid URL
+        if (!filter_var($this->name, FILTER_VALIDATE_URL)) {
+            $this->validationErrors['name'] = 'Invalid URL format';
+            return false;
+        }
+        
+        // Check URL length
+        if (strlen($this->name) > 255) {
+            $this->validationErrors['name'] = 'URL cannot exceed 255 characters';
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Get validation errors
+     *
+     * @return array
+     */
+    public function getValidationErrors(): array
+    {
+        return $this->validationErrors;
     }
 } 
