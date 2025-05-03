@@ -141,13 +141,6 @@ make lint-fix
 
 Based on analysis of the current codebase, here is a step-by-step plan to refactor the application for improved maintainability and extensibility:
 
-### 4. Refactor Validator and Analyzer
-
-- **Create dedicated Service classes**:
-  - Move URL validation logic to UrlValidator service
-  - Refactor Analyzer to be more modular and testable
-  - Implement proper exception handling and error messaging
-
 ### 5. Implement Proper HTTP Request/Response Handling
 
 - **Use PSR-7 Request/Response objects consistently**:

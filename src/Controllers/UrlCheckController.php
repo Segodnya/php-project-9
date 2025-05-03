@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use App\Exceptions\HttpRequestException;
 
 class UrlCheckController extends Controller
 {
@@ -33,6 +34,18 @@ class UrlCheckController extends Controller
             $this->getUrlCheckRepository()->create($data);
 
             $this->getFlash()->addMessage('success', 'Страница успешно проверена');
+        } catch (HttpRequestException $e) {
+            // More specific error handling for HTTP request errors
+            $statusCode = $e->getStatusCode();
+            $message = $e->getMessage();
+            
+            if ($statusCode) {
+                $this->getFlash()->addMessage('danger', 
+                    "Ошибка при проверке: HTTP код {$statusCode}. {$message}");
+            } else {
+                $this->getFlash()->addMessage('danger', 
+                    "Ошибка при проверке: {$message}");
+            }
         } catch (\Exception $e) {
             $this->getFlash()->addMessage('danger', 'Произошла ошибка при проверке: ' . $e->getMessage());
         }
