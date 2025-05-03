@@ -116,9 +116,9 @@ class UrlCheck extends AbstractModel
         return $date->format($format);
     }
     
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
-        $urlCheck = new self(
+        $urlCheck = new static(
             (int) $data['url_id'],
             (int) $data['status_code'],
             $data['h1'] ?? null,

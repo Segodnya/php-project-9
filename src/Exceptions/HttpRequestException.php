@@ -7,23 +7,23 @@ namespace App\Exceptions;
  */
 class HttpRequestException extends HttpException
 {
-    private string $url = '';
+    private ?string $url = null;
 
     public function __construct(
         string $message = "HTTP request failed",
+        ?int $code = 0,
         ?int $statusCode = null,
-        string $url = '',
-        int $errorCode = 0,
-        \Throwable $previous = null
+        ?string $url = null,
+        ?\Throwable $previous = null
     ) {
         $this->url = $url;
-        parent::__construct($message, $statusCode ?? 500, $errorCode, $previous);
+        parent::__construct($message, $statusCode ?? 500, $code ?? 0, $previous);
     }
 
     /**
      * Get the URL that caused the exception
      */
-    public function getUrl(): string
+    public function getUrl(): ?string
     {
         return $this->url;
     }

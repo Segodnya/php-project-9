@@ -59,9 +59,9 @@ class Url extends AbstractModel
         return $date->format($format);
     }
     
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
-        $url = new self($data['name']);
+        $url = new static($data['name']);
         
         if (isset($data['id'])) {
             $url->setId((int) $data['id']);

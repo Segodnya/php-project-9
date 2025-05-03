@@ -20,6 +20,18 @@ setup-db:
 load-db:
 	psql -a -d $(DB_URL) -f database.sql
 
+test:
+	APP_ENV=testing php -d error_reporting="E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" vendor/bin/phpunit || true
+
+test-unit:
+	APP_ENV=testing php -d error_reporting="E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" vendor/bin/phpunit --testsuite=Unit || true
+
+test-coverage:
+	APP_ENV=testing XDEBUG_MODE=coverage php -d error_reporting="E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" vendor/bin/phpunit --coverage-html coverage || true
+
+test-filter:
+	APP_ENV=testing php -d error_reporting="E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" vendor/bin/phpunit --filter=$(filter) || true
+
 docker-build:
 	docker-compose build
 
@@ -46,3 +58,12 @@ docker-exec:
 
 docker-psql:
 	docker-compose exec postgres psql -U postgres -d mydb
+
+docker-test:
+	docker-compose exec app php -d error_reporting="E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" vendor/bin/phpunit || true
+
+docker-test-unit:
+	docker-compose exec app php -d error_reporting="E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" vendor/bin/phpunit --testsuite=Unit || true
+
+docker-test-coverage:
+	docker-compose exec app php -d error_reporting="E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" -d xdebug.mode=coverage vendor/bin/phpunit --coverage-html coverage || true

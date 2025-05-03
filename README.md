@@ -89,6 +89,30 @@ make docker-psql
 \i database.sql
 ```
 
+## Testing
+
+The application includes a comprehensive test suite. To run the tests:
+
+```bash
+# Run all tests
+make test
+
+# Run only unit tests
+make test-unit
+
+# Run tests with code coverage report
+make test-coverage
+```
+
+For Docker environments:
+
+```bash
+# Run tests in Docker
+make docker-test
+```
+
+For more details about the testing framework, see [tests/README.md](tests/README.md).
+
 ### Docker Development Commands
 
 If you need to rebuild the Docker image (e.g., after adding new dependencies):
@@ -138,11 +162,4 @@ make lint-fix
 
 ## Refactoring Plan
 
-Based on analysis of the current codebase, here is a step-by-step plan to refactor the application for improved maintainability and extensibility:
-
-### 8. Add Unit and Integration Tests
-
-- **Create test structure**:
-  - Unit tests for each component
-  - Integration tests for key features
-  - Database tests with in-memory SQLite
+Based on analysis of the current codebase, here is a step-by-step plan to refactor the application for improved maintainability and extensibility, reduce code duplication and improve code readability.
