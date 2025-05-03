@@ -1,20 +1,25 @@
+{% extends 'layouts/app.twig' %}
+
+{% block title %}Сайт: {{ url.name }} | Анализатор страниц{% endblock %}
+
+{% block content %}
 <div class="container-lg mt-5">
-    <h1>Сайт: <?= htmlspecialchars($url['name']) ?></h1>
+    <h1>Сайт: {{ url.name }}</h1>
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover" data-test="url">
             <tbody>
                 <tr>
                     <td>ID</td>
-                    <td><?= $url['id'] ?></td>
+                    <td>{{ url.id }}</td>
                 </tr>
                 <tr>
                     <td>Имя</td>
-                    <td><?= htmlspecialchars($url['name']) ?></td>
+                    <td>{{ url.name }}</td>
                 </tr>
                 <tr>
                     <td>Дата создания</td>
-                    <td><?= $url['created_at'] ?></td>
+                    <td>{{ format_date(url.created_at) }}</td>
                 </tr>
             </tbody>
         </table>
@@ -22,7 +27,7 @@
 
     <h2 class="mt-5">Проверки</h2>
     <div class="d-flex gap-2">
-        <form method="post" action="/urls/<?= $url['id'] ?>/checks">
+        <form method="post" action="/urls/{{ url.id }}/checks">
             <button type="submit" class="btn btn-primary">Запустить проверку</button>
         </form>
         <a href="/urls" class="btn btn-outline-primary">Вернуться</a>
@@ -41,21 +46,20 @@
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($checks as $check): ?>
+                {% for check in checks %}
                     <tr>
-                        <td><?= $check['id'] ?></td>
+                        <td>{{ check.id }}</td>
                         <td>
-                            <span class="badge <?= $check['status_code'] < 400 ? 'bg-success' : 'bg-danger' ?>">
-                                <?= $check['status_code'] ?>
-                            </span>
+                            {{ get_status_badge(check.status_code)|raw }}
                         </td>
-                        <td><?= htmlspecialchars($check['h1'] ?? '') ?></td>
-                        <td><?= htmlspecialchars($check['title'] ?? '') ?></td>
-                        <td><?= htmlspecialchars($check['description'] ?? '') ?></td>
-                        <td><?= $check['created_at'] ?></td>
+                        <td>{{ check.h1 }}</td>
+                        <td>{{ check.title }}</td>
+                        <td>{{ check.description }}</td>
+                        <td>{{ format_date(check.created_at) }}</td>
                     </tr>
-                <?php endforeach; ?>
+                {% endfor %}
             </tbody>
         </table>
     </div>
-</div> 
+</div>
+{% endblock %} 

@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Psr\Http\Message\ResponseInterface;
 use Slim\Psr7\Factory\ResponseFactory;
-use Slim\Views\PhpRenderer;
+use App\Services\ViewService;
 
 /**
  * Service for building standardized responses
@@ -12,12 +12,12 @@ use Slim\Views\PhpRenderer;
 class ResponseBuilder
 {
     private ResponseFactory $responseFactory;
-    private PhpRenderer $renderer;
+    private ViewService $viewService;
 
-    public function __construct(ResponseFactory $responseFactory, PhpRenderer $renderer)
+    public function __construct(ResponseFactory $responseFactory, ViewService $viewService)
     {
         $this->responseFactory = $responseFactory;
-        $this->renderer = $renderer;
+        $this->viewService = $viewService;
     }
 
     /**
@@ -31,7 +31,7 @@ class ResponseBuilder
     public function view(string $template, array $data = [], int $status = 200): ResponseInterface
     {
         $response = $this->responseFactory->createResponse($status);
-        return $this->renderer->render($response, $template, $data);
+        return $this->viewService->render($response, $template, $data);
     }
 
     /**
@@ -120,7 +120,7 @@ class ResponseBuilder
      * @param string $template Template to use for rendering the error
      * @return ResponseInterface
      */
-    public function error(string $message, int $status = 500, string $template = 'errors/error.phtml'): ResponseInterface
+    public function error(string $message, int $status = 500, string $template = 'errors/error.twig'): ResponseInterface
     {
         return $this->view($template, ['error' => $message], $status);
     }
@@ -133,7 +133,7 @@ class ResponseBuilder
      */
     public function notFound(string $message = 'Resource not found'): ResponseInterface
     {
-        return $this->error($message, 404, 'errors/404.phtml');
+        return $this->error($message, 404, 'errors/404.twig');
     }
 
     /**
@@ -143,7 +143,7 @@ class ResponseBuilder
      * @param string $template Template to use for rendering the validation errors
      * @return ResponseInterface
      */
-    public function validationError(array $errors, string $template = 'index.phtml'): ResponseInterface
+    public function validationError(array $errors, string $template = 'index.twig'): ResponseInterface
     {
         return $this->view($template, ['errors' => $errors], 422);
     }

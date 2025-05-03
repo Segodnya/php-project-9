@@ -9,12 +9,10 @@ class HomeController extends Controller
 {
     public function index(Request $request, Response $response): Response
     {
-        $flash = $this->getFlash()->getMessages();
         $params = [
-            'flash' => $flash,
             'title' => 'Анализатор страниц'
         ];
 
-        return $this->responseBuilder->view('index.phtml', $params);
+        return $this->responseBuilder->view('home/index.twig', $params);
     }
 } 

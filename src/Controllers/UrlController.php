@@ -24,11 +24,10 @@ class UrlController extends Controller
 
         $params = [
             'urls' => $urls,
-            'flash' => $this->getFlash()->getMessages(),
             'title' => 'Сайты'
         ];
 
-        return $this->responseBuilder->view('urls/index.phtml', $params);
+        return $this->responseBuilder->view('urls/index.twig', $params);
     }
 
     public function store(Request $request, Response $response): Response
@@ -71,10 +70,9 @@ class UrlController extends Controller
         $params = [
             'url' => $url,
             'checks' => $checks,
-            'flash' => $this->getFlash()->getMessages(),
             'title' => 'Сайт ' . $url['name']
         ];
 
-        return $this->responseBuilder->view('urls/show.phtml', $params);
+        return $this->responseBuilder->view('urls/show.twig', $params);
     }
 } 

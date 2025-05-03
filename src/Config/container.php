@@ -3,6 +3,8 @@
 use DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
 use Slim\Views\PhpRenderer;
+use Slim\Views\Twig;
+use Slim\Views\TwigMiddleware;
 use Slim\Flash\Messages;
 use App\Services\DatabaseConnection;
 use App\Services\RequestHandler;
@@ -10,10 +12,13 @@ use App\Repositories\UrlRepository;
 use App\Repositories\UrlCheckRepository;
 use App\Services\Analyzer;
 use App\Services\ResponseBuilder;
+use App\Services\ViewService;
+use App\Services\ViewHelpers;
 use App\Middleware\ErrorHandlerMiddleware;
 use App\Validation\UrlValidator;
 use App\PDO as AppPDO;
 use Slim\Psr7\Factory\ResponseFactory;
+use Slim\App;
 
 // Create Container Builder
 $containerBuilder = new ContainerBuilder();
@@ -43,11 +48,59 @@ $containerBuilder->addDefinitions(array_merge([
         return new ResponseFactory();
     },
 
+    // View service and Twig setup
+    Twig::class => function (ContainerInterface $c) {
+        $twig = Twig::create(
+            __DIR__ . '/../../templates',
+            [
+                'cache' => ($_ENV['APP_ENV'] ?? 'development') === 'production' 
+                    ? __DIR__ . '/../../var/cache/twig' 
+                    : false,
+                'auto_reload' => true,
+                'debug' => ($_ENV['APP_ENV'] ?? 'development') !== 'production',
+            ]
+        );
+        
+        // Add extensions
+        $twig->getEnvironment()->addExtension(new ViewHelpers());
+        
+        // Add flash messages as a global variable
+        $flash = $c->get(Messages::class);
+        $twig->getEnvironment()->addGlobal('flash', $flash->getMessages());
+        
+        // Add current path as a global variable
+        $twig->getEnvironment()->addGlobal('currentPath', $_SERVER['REQUEST_URI'] ?? '/');
+        
+        return $twig;
+    },
+    
+    ViewService::class => function (ContainerInterface $c) {
+        return new ViewService($c->get(Twig::class));
+    },
+    
+    // The TwigMiddleware factory now returns a factory function that takes an App instance
+    // This breaks the circular dependency
+    'twig-middleware-factory' => function (ContainerInterface $c) {
+        return function (App $app) use ($c) {
+            return TwigMiddleware::createFromContainer($app, Twig::class);
+        };
+    },
+    
+    // Legacy PhpRenderer for backward compatibility during transition
+    PhpRenderer::class => function () {
+        $phpView = new PhpRenderer(__DIR__ . '/../../templates');
+        $phpView->setLayout('layout.phtml');
+        return $phpView;
+    },
+    'renderer' => function (ContainerInterface $c) {
+        return $c->get(PhpRenderer::class);
+    },
+
     // Response builder
     ResponseBuilder::class => function (ContainerInterface $c) {
         return new ResponseBuilder(
             $c->get(ResponseFactory::class),
-            $c->get(PhpRenderer::class)
+            $c->get(ViewService::class)
         );
     },
 
@@ -62,16 +115,6 @@ $containerBuilder->addDefinitions(array_merge([
             $c->get(ResponseBuilder::class),
             $c->get('settings')['displayErrorDetails']
         );
-    },
-
-    // View renderer
-    PhpRenderer::class => function () {
-        $phpView = new PhpRenderer(__DIR__ . '/../../templates');
-        $phpView->setLayout('layout.phtml');
-        return $phpView;
-    },
-    'renderer' => function (ContainerInterface $c) {
-        return $c->get(PhpRenderer::class);
     },
 
     // Flash messages

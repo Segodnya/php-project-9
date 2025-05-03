@@ -24,7 +24,11 @@ class Middleware
             $settings['logErrorDetails']
         );
 
+        // Add Twig Middleware using the factory
+        $twigMiddlewareFactory = $container->get('twig-middleware-factory');
+        $app->add($twigMiddlewareFactory($app));
+
         // Add other middleware here as needed
         // Example: $app->add(SomeMiddleware::class);
     }
-} 
+}

@@ -23,6 +23,9 @@ COPY composer.json composer.lock* ./
 # Install PHP dependencies
 RUN composer install --no-autoloader --no-scripts --no-interaction
 
+# Make sure Twig is installed
+RUN composer require slim/twig-view
+
 # Copy the rest of the application files
 COPY . .
 

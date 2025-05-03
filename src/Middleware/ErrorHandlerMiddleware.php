@@ -44,7 +44,7 @@ class ErrorHandlerMiddleware implements MiddlewareInterface
             return $this->responseBuilder->error($exception->getMessage(), $statusCode);
         } catch (ValidationException $exception) {
             // Handle validation exceptions with custom template if provided
-            $template = $exception->getTemplate() ?: 'index.phtml';
+            $template = $exception->getTemplate() ?: 'home/index.twig';
             return $this->responseBuilder->validationError($exception->getErrors(), $template);
         } catch (Throwable $exception) {
             // Log the exception

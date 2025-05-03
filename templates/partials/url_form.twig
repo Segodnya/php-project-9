@@ -1,0 +1,25 @@
+<form action="/urls" method="post" class="mt-3 mb-3">
+    <div class="row">
+        <div class="col">
+            <div class="form-floating">
+                <input 
+                    type="text" 
+                    class="form-control {% if errors.url is defined %}is-invalid{% endif %}" 
+                    id="url-input" 
+                    name="url[name]" 
+                    placeholder="https://www.example.com" 
+                    required
+                >
+                <label for="url-input">Url для проверки</label>
+                {% if errors.url is defined %}
+                    <div class="invalid-feedback">
+                        {{ errors.url }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary btn-lg px-5">{{ button_text|default('Проверить') }}</button>
+        </div>
+    </div>
+</form> 
