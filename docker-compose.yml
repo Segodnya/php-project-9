@@ -10,4 +10,23 @@ services:
       # Exclude vendor directory from the mount to preserve the one in the container
       - /app/vendor
     environment:
-      - PORT=8000 
+      - PORT=8000
+      - DATABASE_URL=postgresql://janedoe:mypassword@postgres:5432/mydb
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_USER: janedoe
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Mount database.sql to be executed on container initialization
+      - ./database.sql:/docker-entrypoint-initdb.d/database.sql
+
+volumes:
+  postgres_data: 

@@ -7,5 +7,7 @@
     <file>public</file>
     <file>src</file>
 
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+
     <rule ref="PSR12"/>
 </ruleset> 

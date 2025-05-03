@@ -10,17 +10,23 @@ Page Analyzer is available at [https://php-project-9-zfib.onrender.com/](https:/
 
 ## Requirements
 
-* PHP 8.0+ or Docker
+* PHP 8.1+ or Docker
 * Composer (for local development)
+* PostgreSQL (for local development)
 
 ## Installation
 
-### Local Installation (requires PHP 8.0+)
+### Local Installation (requires PHP 8.1+ and PostgreSQL)
 
 ```bash
 git clone https://github.com/Segodnya/php-project-9.git
 cd php-project-9
 make install
+
+# Set up the database
+cp .env.example .env
+# Edit .env to match your PostgreSQL credentials
+make setup-db
 ```
 
 ### Using Docker (recommended)
@@ -33,9 +39,10 @@ make docker-build
 
 ## Usage
 
-### Running Locally (requires PHP 8.0+)
+### Running Locally (requires PHP 8.1+ and PostgreSQL)
 
 ```bash
+# Make sure your PostgreSQL server is running
 make start
 ```
 
@@ -47,12 +54,40 @@ Then open http://localhost:8000 in your browser.
 make docker-start
 ```
 
+This will start both the PHP application and a PostgreSQL database container.
 Then open http://localhost:8000 in your browser.
 
-To access the container shell:
+To access the application container shell:
 
 ```bash
-make docker-bash
+make docker-exec
+```
+
+To access the PostgreSQL database:
+
+```bash
+make docker-psql
+```
+
+### Database Configuration
+
+The application uses PostgreSQL for data storage. The connection is configured using the `DATABASE_URL` environment variable:
+
+```
+DATABASE_URL=postgresql://username:password@host:port/database
+```
+
+When running with Docker, this is automatically configured. For local development, copy `.env.example` to `.env` and update the values to match your PostgreSQL instance.
+
+To manually initialize or update the database schema:
+
+```bash
+# Local
+make load-db
+
+# Docker
+make docker-psql
+\i database.sql
 ```
 
 ### Docker Development Commands
@@ -70,6 +105,12 @@ make docker-install  # Run composer install in the container
 ```
 
 ## Troubleshooting
+
+### Database Connectivity Issues
+
+- Check that your PostgreSQL server is running
+- Verify the `DATABASE_URL` environment variable is correctly set
+- For Docker, ensure both the `app` and `postgres` services are running with `docker-compose ps`
 
 ### Issues with vendor directory
 
