@@ -140,22 +140,6 @@ make lint-fix
 
 Based on analysis of the current codebase, here is a step-by-step plan to refactor the application for improved maintainability and extensibility:
 
-### 6. Refactor Templates
-
-- **Implement a View Service**:
-  - Create a dedicated service for rendering views
-  - Organize templates by feature
-  - Replace phtml templates with Twig templates
-  - Extract common UI components to partials
-  - Implement view helpers for common UI patterns
-
-### 7. Implement Error Handling
-
-- **Create error handlers**:
-  - Custom exception classes
-  - Dedicated error pages
-  - Proper logging
-
 ### 8. Add Unit and Integration Tests
 
 - **Create test structure**:

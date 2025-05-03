@@ -14,6 +14,7 @@ use App\Services\Analyzer;
 use App\Services\ResponseBuilder;
 use App\Services\ViewService;
 use App\Services\ViewHelpers;
+use App\Services\LoggerService;
 use App\Middleware\ErrorHandlerMiddleware;
 use App\Validation\UrlValidator;
 use App\PDO as AppPDO;
@@ -46,6 +47,14 @@ $containerBuilder->addDefinitions(array_merge([
     // Factory for creating responses
     ResponseFactory::class => function () {
         return new ResponseFactory();
+    },
+
+    // Logger service
+    LoggerService::class => function () {
+        return new LoggerService('page-analyzer');
+    },
+    'logger' => function (ContainerInterface $c) {
+        return $c->get(LoggerService::class);
     },
 
     // View service and Twig setup
@@ -113,6 +122,7 @@ $containerBuilder->addDefinitions(array_merge([
     ErrorHandlerMiddleware::class => function (ContainerInterface $c) {
         return new ErrorHandlerMiddleware(
             $c->get(ResponseBuilder::class),
+            $c->get(LoggerService::class),
             $c->get('settings')['displayErrorDetails']
         );
     },
