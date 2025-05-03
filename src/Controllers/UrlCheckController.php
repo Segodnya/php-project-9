@@ -14,9 +14,7 @@ class UrlCheckController extends Controller
         $url = $this->getUrlRepository()->findById($id);
 
         if (!$url) {
-            $this->getFlash()->addMessage('danger', 'Страница не найдена');
-            return $response->withHeader('Location', '/urls')
-                ->withStatus(302);
+            return $this->responseBuilder->notFound('Страница не найдена');
         }
 
         try {
@@ -50,7 +48,6 @@ class UrlCheckController extends Controller
             $this->getFlash()->addMessage('danger', 'Произошла ошибка при проверке: ' . $e->getMessage());
         }
 
-        return $response->withHeader('Location', '/urls/' . $id)
-            ->withStatus(302);
+        return $this->responseBuilder->redirect('/urls/' . $id);
     }
 } 

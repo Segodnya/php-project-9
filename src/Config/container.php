@@ -5,11 +5,15 @@ use Psr\Container\ContainerInterface;
 use Slim\Views\PhpRenderer;
 use Slim\Flash\Messages;
 use App\Services\DatabaseConnection;
+use App\Services\RequestHandler;
 use App\Repositories\UrlRepository;
 use App\Repositories\UrlCheckRepository;
 use App\Services\Analyzer;
+use App\Services\ResponseBuilder;
+use App\Middleware\ErrorHandlerMiddleware;
 use App\Validation\UrlValidator;
 use App\PDO as AppPDO;
+use Slim\Psr7\Factory\ResponseFactory;
 
 // Create Container Builder
 $containerBuilder = new ContainerBuilder();
@@ -32,6 +36,32 @@ $containerBuilder->addDefinitions(array_merge([
             'logErrors' => true,
             'logErrorDetails' => true,
         ];
+    },
+
+    // Factory for creating responses
+    ResponseFactory::class => function () {
+        return new ResponseFactory();
+    },
+
+    // Response builder
+    ResponseBuilder::class => function (ContainerInterface $c) {
+        return new ResponseBuilder(
+            $c->get(ResponseFactory::class),
+            $c->get(PhpRenderer::class)
+        );
+    },
+
+    // Request handler
+    RequestHandler::class => function () {
+        return new RequestHandler();
+    },
+
+    // Error handler middleware
+    ErrorHandlerMiddleware::class => function (ContainerInterface $c) {
+        return new ErrorHandlerMiddleware(
+            $c->get(ResponseBuilder::class),
+            $c->get('settings')['displayErrorDetails']
+        );
     },
 
     // View renderer

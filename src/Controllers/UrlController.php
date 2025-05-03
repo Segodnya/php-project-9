@@ -28,7 +28,7 @@ class UrlController extends Controller
             'title' => 'Сайты'
         ];
 
-        return $this->render($response, 'urls/index.phtml', $params);
+        return $this->responseBuilder->view('urls/index.phtml', $params);
     }
 
     public function store(Request $request, Response $response): Response
@@ -44,29 +44,16 @@ class UrlController extends Controller
 
             if ($existingUrl) {
                 $this->getFlash()->addMessage('info', 'Страница уже существует');
-                return $response->withHeader('Location', '/urls/' . $existingUrl['id'])
-                    ->withStatus(302);
+                return $this->responseBuilder->redirect('/urls/' . $existingUrl['id']);
             }
 
             $id = $this->getUrlRepository()->create(['name' => $normalizedUrl]);
 
             $this->getFlash()->addMessage('success', 'Страница успешно добавлена');
-            return $response->withHeader('Location', '/urls/' . $id)
-                ->withStatus(302);
+            return $this->responseBuilder->redirect('/urls/' . $id);
         } catch (ValidationException $e) {
-            $this->getFlash()->addMessage('danger', implode(', ', $e->getErrors()));
-            $params = [
-                'errors' => ['url' => implode(', ', $e->getErrors())],
-                'flash' => $this->getFlash()->getMessages(),
-                'title' => 'Анализатор страниц'
-            ];
-            return $this->render($response->withStatus(422), 'index.phtml', $params);
-        } catch (\Exception $e) {
-            $this->getFlash()->addMessage('danger', 'Произошла ошибка: ' . $e->getMessage());
-            return $this->render($response->withStatus(500), 'index.phtml', [
-                'flash' => $this->getFlash()->getMessages(),
-                'title' => 'Анализатор страниц'
-            ]);
+            // The error middleware will handle this exception
+            throw $e;
         }
     }
 
@@ -76,9 +63,7 @@ class UrlController extends Controller
         $url = $this->getUrlRepository()->findById($id);
 
         if (!$url) {
-            $this->getFlash()->addMessage('danger', 'Страница не найдена');
-            return $response->withHeader('Location', '/urls')
-                ->withStatus(302);
+            return $this->responseBuilder->notFound('Страница не найдена');
         }
 
         $checks = $this->getUrlCheckRepository()->findByUrlId($id);
@@ -90,6 +75,6 @@ class UrlController extends Controller
             'title' => 'Сайт ' . $url['name']
         ];
 
-        return $this->render($response, 'urls/show.phtml', $params);
+        return $this->responseBuilder->view('urls/show.phtml', $params);
     }
 } 

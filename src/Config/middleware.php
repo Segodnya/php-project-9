@@ -4,6 +4,7 @@ namespace App\Config;
 
 use Slim\App;
 use Psr\Container\ContainerInterface;
+use App\Middleware\ErrorHandlerMiddleware;
 
 class Middleware
 {
@@ -12,7 +13,11 @@ class Middleware
         // Get settings
         $settings = $container->get('settings');
 
-        // Add Error Middleware
+        // Add ErrorHandlerMiddleware (must be added first to catch all exceptions)
+        $app->add($container->get(ErrorHandlerMiddleware::class));
+
+        // Add Error Middleware (Slim's internal error handler)
+        // This is still useful for handling Slim-specific errors
         $app->addErrorMiddleware(
             $settings['displayErrorDetails'],
             $settings['logErrors'],

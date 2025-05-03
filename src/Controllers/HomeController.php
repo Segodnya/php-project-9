@@ -15,6 +15,6 @@ class HomeController extends Controller
             'title' => 'Анализатор страниц'
         ];
 
-        return $this->render($response, 'index.phtml', $params);
+        return $this->responseBuilder->view('index.phtml', $params);
     }
 } 

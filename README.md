@@ -141,17 +141,12 @@ make lint-fix
 
 Based on analysis of the current codebase, here is a step-by-step plan to refactor the application for improved maintainability and extensibility:
 
-### 5. Implement Proper HTTP Request/Response Handling
-
-- **Use PSR-7 Request/Response objects consistently**:
-  - Create response builders for common response types
-  - Standardize error responses
-
 ### 6. Refactor Templates
 
 - **Implement a View Service**:
   - Create a dedicated service for rendering views
   - Organize templates by feature
+  - Replace phtml templates with Twig templates
   - Extract common UI components to partials
   - Implement view helpers for common UI patterns
 

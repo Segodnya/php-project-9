@@ -2,30 +2,27 @@
 
 namespace App\Exceptions;
 
-use Exception;
-
-class HttpRequestException extends Exception
+/**
+ * Exception for HTTP client request errors
+ */
+class HttpRequestException extends HttpException
 {
-    private ?int $statusCode = null;
     private string $url = '';
 
     public function __construct(
         string $message = "HTTP request failed",
-        int $code = 0,
         ?int $statusCode = null,
         string $url = '',
-        Exception $previous = null
+        int $errorCode = 0,
+        \Throwable $previous = null
     ) {
-        $this->statusCode = $statusCode;
         $this->url = $url;
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $statusCode ?? 500, $errorCode, $previous);
     }
 
-    public function getStatusCode(): ?int
-    {
-        return $this->statusCode;
-    }
-
+    /**
+     * Get the URL that caused the exception
+     */
     public function getUrl(): string
     {
         return $this->url;

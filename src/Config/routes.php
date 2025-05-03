@@ -7,6 +7,7 @@ use Slim\Interfaces\RouteCollectorProxyInterface;
 use App\Controllers\HomeController;
 use App\Controllers\UrlController;
 use App\Controllers\UrlCheckController;
+use App\Controllers\ApiController;
 
 class Routes
 {
@@ -25,5 +26,12 @@ class Routes
             // URL Check routes
             $group->post('/urls/{id:[0-9]+}/checks', [UrlCheckController::class, 'store'])->setName('urls.checks.store');
         });
+
+        // API routes
+        $app->group('/api', function (RouteCollectorProxyInterface $group) {
+            // URL API endpoints
+            $group->get('/urls', [ApiController::class, 'getUrls']);
+            $group->get('/urls/{id:[0-9]+}', [ApiController::class, 'getUrl']);
+        });
     }
-} 
+}
