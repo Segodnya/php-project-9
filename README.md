@@ -3,49 +3,94 @@
 
 # Page Analyzer
 
-Page Analyzer is a web application that analyzes specified pages for SEO suitability.
+Page Analyzer is a web application that allows you to analyze specified pages for SEO suitability.
 
-Page Analyzer is available at [https://php-project-9-zfib.onrender.com/](https://php-project-9-zfib.onrender.com/).
+## Features
+
+- Add URLs to the system for analysis
+- Check URLs for SEO parameters (status code, H1, title, description)
+- View the history of checks for each URL
+- Simple, single-file PHP application
 
 ## Requirements
 
-* PHP 8.3.20 or higher
+* PHP 8.2 or higher
 * Composer
+* SQLite (for local development) or PostgreSQL (for production)
 
 ## Installation
 
+Clone the repository and install dependencies:
+
 ```bash
-git clone https://github.com/Segodnya/php-project-9.git
+git clone https://github.com/yourusername/php-project-9.git
 cd php-project-9
 make install
 ```
 
 ## Usage
 
-### Running Locally
+### Local Development
 
-The application uses SQLite by default in development, with no additional configuration required.
+For local development, the application uses SQLite by default:
 
 ```bash
+# Set up the database
+make setup
+
 # Start the application
 make start
 ```
 
 Then open http://localhost:8080 in your browser.
 
-### Database Configuration
+### Production Deployment
 
-For local development, the application automatically uses SQLite with a `database.sqlite` file created in the project root directory. No configuration is needed.
-
-For production environments, configure the database connection using the `DATABASE_URL` environment variable:
+For production, configure the database connection using the `DATABASE_URL` environment variable:
 
 ```
 DATABASE_URL=postgresql://username:password@host:port/database
 ```
 
-Example:
+### Docker Deployment
+
+You can also run the application using Docker:
+
+```bash
+# Build the Docker image
+make docker-build
+
+# Run with Docker (optionally providing a DATABASE_URL)
+make docker-run
+# or
+docker run -p 8080:8080 -e DATABASE_URL=postgresql://username:password@host:port/database page-analyzer
 ```
-DATABASE_URL=postgresql://janedoe:mypassword@localhost:5432/mydb
+
+## Render.com Deployment
+
+This application is ready to be deployed on Render.com. 
+
+1. Create a new Web Service pointing to your repository
+2. Set the environment variable `DATABASE_URL` if you want to use PostgreSQL
+3. The Dockerfile will be automatically detected and used for deployment
+
+## Project Structure
+
+- `public/index.php` - Main application file containing all the code
+- `public/views/` - HTML views
+- `database.sql` - SQL schema for the database
+
+## Development
+
+```bash
+# Check code style
+make lint
+
+# Fix code style issues
+make lint-fix
+
+# Check database connection
+make db-check
 ```
 
 ## Testing
@@ -62,73 +107,3 @@ make test-unit
 # Run tests with code coverage report
 make test-coverage
 ```
-
-## Development
-
-Lint check:
-
-```bash
-make lint
-```
-
-Fix linting issues:
-
-```bash
-make lint-fix
-```
-
-## Refactoring Plan
-
-Based on analysis of the current codebase, here is a step-by-step plan to refactor the application for improved maintainability and extensibility:
-
-1. **Implement Data Transfer Objects (DTOs)**
-   - Create DTOs for clear data passing between layers
-   - Replace direct array usage with typed objects
-   - Improve type safety and code readability
-
-2. **Enhance Error Handling**
-   - Implement centralized error handling middleware
-   - Create specific exception classes for different error types
-   - Add proper logging throughout the application
-
-3. **Extract Business Logic from Controllers**
-   - Move business logic from controllers to dedicated service classes
-   - Controllers should only be responsible for HTTP request/response handling
-   - Implement the Command pattern for complex operations
-
-4. **Implement Repository Pattern Consistently**
-   - Standardize interface for all repositories
-   - Add caching layer for frequently accessed data
-   - Introduce unit of work pattern for transaction management
-
-5. **Apply SOLID Principles**
-   - Single Responsibility: Split large classes into smaller, focused ones
-   - Open/Closed: Use interfaces and abstractions for extensibility
-   - Dependency Inversion: Inject dependencies rather than creating them
-
-6. **Improve Service Layer**
-   - Create domain-specific services with clear responsibilities
-   - Reduce direct dependency on external libraries
-   - Implement adapter pattern for external services
-
-7. **Enhance Testing Strategy**
-   - Increase unit test coverage
-   - Implement integration tests for critical paths
-   - Add contract tests for external dependencies
-
-8. **Optimize Database Interactions**
-   - Review and optimize SQL queries
-   - Implement database migrations
-   - Add indexes for frequently queried columns
-
-9. **Standardize Configuration**
-   - Centralize configuration management
-   - Implement environment-specific configuration
-   - Use dependency injection for configuration
-
-10. **Documentation Improvements**
-    - Add comprehensive PHPDoc comments
-    - Create API documentation
-    - Improve code organization with consistent naming conventions
-
-The refactoring should be done incrementally, with thorough testing after each step to ensure functionality is maintained.
