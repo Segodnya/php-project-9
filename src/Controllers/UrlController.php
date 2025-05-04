@@ -36,23 +36,33 @@ class UrlController extends Controller
         $url = $data['url']['name'] ?? '';
 
         try {
+            error_log('Validating URL: ' . $url);
             $validator = $this->container->get(UrlValidator::class);
             $normalizedUrl = $validator->validateAndNormalize($url);
+            error_log('Normalized URL: ' . $normalizedUrl);
 
             $existingUrl = $this->getUrlRepository()->findByName($normalizedUrl);
 
             if ($existingUrl) {
+                error_log('URL already exists with ID: ' . $existingUrl['id']);
                 $this->getFlash()->addMessage('info', 'Страница уже существует');
                 return $this->responseBuilder->redirect('/urls/' . $existingUrl['id']);
             }
 
+            error_log('Creating new URL: ' . $normalizedUrl);
             $id = $this->getUrlRepository()->create(['name' => $normalizedUrl]);
+            error_log('URL created with ID: ' . $id);
 
             $this->getFlash()->addMessage('success', 'Страница успешно добавлена');
             return $this->responseBuilder->redirect('/urls/' . $id);
         } catch (ValidationException $e) {
+            error_log('Validation exception: ' . $e->getMessage());
             // The error middleware will handle this exception
             throw $e;
+        } catch (\Exception $e) {
+            error_log('Unexpected error in UrlController::store: ' . $e->getMessage());
+            $this->getFlash()->addMessage('danger', 'Произошла ошибка: ' . $e->getMessage());
+            return $this->responseBuilder->redirect('/');
         }
     }
 

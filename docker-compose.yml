@@ -11,7 +11,7 @@ services:
       - /app/vendor
     environment:
       - PORT=8080
-      - DATABASE_URL=postgresql://postgres:mypassword@postgres:5432/mydb
+      - DATABASE_URL=postgresql://postgres:mypassword@localhost:5432/mydb
     depends_on:
       postgres:
         condition: service_healthy

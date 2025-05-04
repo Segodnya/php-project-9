@@ -5,6 +5,7 @@ namespace App\Services;
 // Use fully qualified name for PDO
 use \PDO;
 use InvalidArgumentException;
+use RuntimeException;
 
 class DatabaseConnection
 {
@@ -15,15 +16,27 @@ class DatabaseConnection
      *
      * @return \PDO
      * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     public static function get(): \PDO
     {
         if (self::$pdo === null) {
             if (!isset($_ENV['DATABASE_URL'])) {
-                throw new InvalidArgumentException('DATABASE_URL environment variable is not set');
+                $errorMessage = 'DATABASE_URL environment variable is not set';
+                error_log($errorMessage);
+                throw new InvalidArgumentException($errorMessage);
             }
 
-            self::$pdo = DatabaseFactory::createFromUrl($_ENV['DATABASE_URL']);
+            try {
+                self::$pdo = DatabaseFactory::createFromUrl($_ENV['DATABASE_URL']);
+                
+                // Test connection
+                self::$pdo->query('SELECT 1');
+            } catch (\PDOException $e) {
+                $errorMessage = 'Database connection failed: ' . $e->getMessage();
+                error_log($errorMessage);
+                throw new RuntimeException($errorMessage, 0, $e);
+            }
         }
 
         return self::$pdo;
