@@ -74,7 +74,7 @@ class App
     private function createContainer(): Container
     {
         try {
-            return require dirname(__DIR__) . '/src/Config/container.php';
+            return require dirname(__DIR__) . '/src/Config/Container.php';
         } catch (Exception $e) {
             error_log('Container creation error: ' . $e->getMessage());
             throw $e;
@@ -106,7 +106,7 @@ class App
      */
     private function registerRoutes(): void
     {
-        $routes = require dirname(__DIR__) . '/src/Routes/web.php';
+        $routes = require dirname(__DIR__) . '/src/Routes/Web.php';
         $routes($this->app);
     }
 

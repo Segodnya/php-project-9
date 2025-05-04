@@ -1,5 +1,7 @@
 <?php
 
+// renamed
+
 use Slim\App;
 use App\Config\Routes;
 

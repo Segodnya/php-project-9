@@ -1,5 +1,7 @@
 <?php
 
+// renamed
+
 namespace App\Config;
 
 use Slim\App;

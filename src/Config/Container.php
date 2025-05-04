@@ -1,5 +1,7 @@
 <?php
 
+// renamed
+
 use DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
 use Slim\Views\PhpRenderer;
