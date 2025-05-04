@@ -251,6 +251,7 @@ function normalizeUrl(string $url): string
  *
  * @param int $id URL ID
  * @return array<string, mixed>|null URL data or null if not found
+ * @phpstan-return array<string, mixed>|null
  */
 function findUrlById(int $id): ?array
 {
@@ -258,8 +259,14 @@ function findUrlById(int $id): ?array
     $stmt = $pdo->prepare('SELECT * FROM urls WHERE id = :id');
     $stmt->execute(['id' => $id]);
 
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $result === false ? null : $result;
+    $fetchedResult = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($fetchedResult === false) {
+        return null;
+    }
+
+    /** @var array<string, mixed> $result */
+    $result = $fetchedResult;
+    return $result;
 }
 
 /**
@@ -267,6 +274,7 @@ function findUrlById(int $id): ?array
  *
  * @param string $name URL name
  * @return array<string, mixed>|null URL data or null if not found
+ * @phpstan-return array<string, mixed>|null
  */
 function findUrlByName(string $name): ?array
 {
@@ -274,8 +282,14 @@ function findUrlByName(string $name): ?array
     $stmt = $pdo->prepare('SELECT * FROM urls WHERE name = :name');
     $stmt->execute(['name' => $name]);
 
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $result === false ? null : $result;
+    $fetchedResult = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($fetchedResult === false) {
+        return null;
+    }
+
+    /** @var array<string, mixed> $result */
+    $result = $fetchedResult;
+    return $result;
 }
 
 /**
@@ -331,6 +345,7 @@ function findUrlChecksByUrlId(int $urlId): array
  *
  * @param int $urlId URL ID
  * @return array<string, mixed>|null URL check data or null if not found
+ * @phpstan-return array<string, mixed>|null
  */
 function findLatestUrlCheckByUrlId(int $urlId): ?array
 {
@@ -338,8 +353,14 @@ function findLatestUrlCheckByUrlId(int $urlId): ?array
     $stmt = $pdo->prepare('SELECT * FROM url_checks WHERE url_id = :url_id ORDER BY id DESC LIMIT 1');
     $stmt->execute(['url_id' => $urlId]);
 
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $result === false ? null : $result;
+    $fetchedResult = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($fetchedResult === false) {
+        return null;
+    }
+
+    /** @var array<string, mixed> $result */
+    $result = $fetchedResult;
+    return $result;
 }
 
 /**
@@ -404,14 +425,19 @@ function analyzeUrl(string $url): array
 
                     // Extract h1 tag content
                     $h1Element = $document->first('h1');
-                    // DiDom\Element has a text() method, but PHPStan doesn't know about it
-                    // Use a different approach that PHPStan can understand
-                    $result['h1'] = $h1Element ? trim($h1Element->text()) : null;
+                    // Use a safer approach with explicit null checking
+                    $result['h1'] = null;
+                    if ($h1Element instanceof DiDom\Element) {
+                        $result['h1'] = trim($h1Element->innerHtml());
+                    }
 
                     // Extract title tag content
                     $titleElement = $document->first('title');
-                    // Same issue with text() method
-                    $result['title'] = $titleElement ? trim($titleElement->text()) : null;
+                    // Use a safer approach with explicit null checking
+                    $result['title'] = null;
+                    if ($titleElement instanceof DiDom\Element) {
+                        $result['title'] = trim($titleElement->innerHtml());
+                    }
 
                     // Extract meta description content
                     $descElement = $document->first('meta[name="description"]');
@@ -465,13 +491,17 @@ function h(mixed $text): string
     if (!is_string($text)) {
         // Convert different types appropriately
         if (is_bool($text)) {
-            $text = $text ? 'true' : 'false';
+            return $text ? 'true' : 'false';
         } elseif (is_array($text) || is_object($text)) {
             // For arrays and objects, use json_encode for a safer representation
-            $text = json_encode($text) ?: '[Uncoded value]';
+            $encodedText = json_encode($text);
+            return htmlspecialchars($encodedText !== false ? $encodedText : '[Uncoded value]', ENT_QUOTES, 'UTF-8');
+        } elseif (is_int($text) || is_float($text)) {
+            // For numeric types, use string representation
+            return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
         } else {
-            // For numbers and other scalar types
-            $text = (string) $text;
+            // For any other type, fallback to an empty string
+            return '';
         }
     }
 
@@ -524,7 +554,8 @@ if (isset($GLOBALS['USE_TEST_PDO']) && $GLOBALS['USE_TEST_PDO']) {
     // Only parse request data when not in test mode
     $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
     $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-    $requestUri = parse_url($requestUri, PHP_URL_PATH);
+    $parsedUri = parse_url((string) $requestUri, PHP_URL_PATH);
+    $requestUri = $parsedUri !== false ? (string) $parsedUri : '/';
 
     // Routes handling
     try {

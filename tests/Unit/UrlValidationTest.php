@@ -43,7 +43,7 @@ class UrlValidationTest extends TestCase
      */
     public function testValidUrlsAreNormalized(string $inputUrl, string $expectedUrl): void
     {
-        $this->assertEquals($expectedUrl, normalizeUrl($inputUrl));
+        self::assertSame($expectedUrl, normalizeUrl($inputUrl));
     }
 
     /**
@@ -51,7 +51,7 @@ class UrlValidationTest extends TestCase
      */
     public function testInvalidUrlsThrowException(string $invalidUrl): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(InvalidArgumentException::class);
         normalizeUrl($invalidUrl);
     }
 

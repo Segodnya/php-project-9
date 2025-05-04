@@ -75,7 +75,7 @@ class UrlTest extends TestCase
         $id = createUrl($urlName);
 
         // Verify the URL was created with an ID
-        $this->assertIsNumeric($id);
+        self::assertIsNumeric($id);
 
         // Find the URL by ID and ensure we pass an int to the function
         $url = null;
@@ -84,7 +84,7 @@ class UrlTest extends TestCase
         }
 
         // Verify the URL was found and has the correct name
-        $this->assertNotNull($url);
-        $this->assertEquals($urlName, $url['name'] ?? null);
+        self::assertNotNull($url);
+        self::assertSame($urlName, $url['name'] ?? null);
     }
 }

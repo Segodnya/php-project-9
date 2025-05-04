@@ -8,13 +8,3 @@ parameters:
     # Add bootstrap file for autoloading
     bootstrapFiles:
         - vendor/autoload.php
-    # Ignoring specific errors that can't be fixed directly
-    ignoreErrors:
-        # DiDom text() method issue
-        - message: '#Call to an undefined method DiDom\\Element\|DOMElement::text\(\).#'
-        # PDO fetch return type issues
-        - message: '#Function findUrlById\(\) should return array<string, mixed>\|null but returns mixed.#'
-        - message: '#Function findUrlByName\(\) should return array<string, mixed>\|null but returns mixed.#'
-        - message: '#Function findLatestUrlCheckByUrlId\(\) should return array<string, mixed>\|null but returns mixed.#'
-        # Mixed to string cast issues
-        - message: '#Cannot cast mixed to string.#'
