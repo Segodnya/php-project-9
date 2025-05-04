@@ -5,6 +5,11 @@ parameters:
         - tests
     excludePaths:
         - vendor
-    # Add bootstrap file for autoloading
+    # Add bootstrap files for autoloading
     bootstrapFiles:
         - vendor/autoload.php
+        - vendor/phpunit/phpunit/src/Framework/Assert.php
+        - vendor/phpunit/phpunit/src/Framework/TestCase.php
+        - tests/bootstrap.php
+    scanDirectories:
+        - vendor/phpunit/phpunit/src

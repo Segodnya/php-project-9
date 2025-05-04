@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use PDO;
+use PHPUnit\Framework\Assert;
 
 /**
  * @requires extension PDO
@@ -75,7 +76,7 @@ class UrlTest extends TestCase
         $id = createUrl($urlName);
 
         // Verify the URL was created with an ID
-        self::assertIsNumeric($id);
+        Assert::assertIsNumeric($id);
 
         // Find the URL by ID and ensure we pass an int to the function
         $url = null;
@@ -84,7 +85,7 @@ class UrlTest extends TestCase
         }
 
         // Verify the URL was found and has the correct name
-        self::assertNotNull($url);
-        self::assertSame($urlName, $url['name'] ?? null);
+        Assert::assertNotNull($url);
+        Assert::assertSame($urlName, $url['name'] ?? null);
     }
 }

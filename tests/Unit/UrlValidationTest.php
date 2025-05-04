@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use InvalidArgumentException;
+use PHPUnit\Framework\Assert;
 
 /**
  * @requires extension PDO
@@ -43,7 +44,7 @@ class UrlValidationTest extends TestCase
      */
     public function testValidUrlsAreNormalized(string $inputUrl, string $expectedUrl): void
     {
-        self::assertSame($expectedUrl, normalizeUrl($inputUrl));
+        Assert::assertSame($expectedUrl, normalizeUrl($inputUrl));
     }
 
     /**
@@ -51,7 +52,7 @@ class UrlValidationTest extends TestCase
      */
     public function testInvalidUrlsThrowException(string $invalidUrl): void
     {
-        self::expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         normalizeUrl($invalidUrl);
     }
 
