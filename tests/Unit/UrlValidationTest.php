@@ -68,6 +68,9 @@ class UrlValidationTest extends TestCase
             'missing scheme' => ['example.com'],
             'invalid scheme' => ['ftp://example.com'],
             'missing host' => ['https://'],
+            'incomplete domain (no dot)' => ['https://goo'],
+            'incomplete domain (no tld)' => ['https://example.'],
+            'invalid tld (too short)' => ['https://example.a'],
         ];
     }
 }

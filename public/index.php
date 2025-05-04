@@ -168,8 +168,21 @@ function normalizeUrl($url)
         throw new InvalidArgumentException('URL scheme must be http or https');
     }
 
+    // Validate the host: it must have at least one dot to separate domain and TLD
+    $host = strtolower($parsedUrl['host']);
+    if (strpos($host, '.') === false) {
+        throw new InvalidArgumentException('Некорректный URL: hostname must include domain and TLD');
+    }
+
+    // Additional validation: TLD must be at least 2 characters
+    $parts = explode('.', $host);
+    $tld = end($parts);
+    if (strlen($tld) < 2) {
+        throw new InvalidArgumentException('Некорректный URL: invalid top-level domain');
+    }
+
     // Normalize to scheme://host
-    $normalizedUrl = $scheme . '://' . strtolower($parsedUrl['host']);
+    $normalizedUrl = $scheme . '://' . $host;
 
     // Add port if specified and not default
     if (isset($parsedUrl['port'])) {
@@ -310,7 +323,12 @@ function analyzeUrl($url)
         throw new Exception('Не удалось подключиться к сайту');
     } catch (GuzzleHttp\Exception\RequestException $e) {
         $statusCode = $e->hasResponse() ? $e->getResponse()->getStatusCode() : null;
-        throw new Exception('Ошибка при запросе: ' . $e->getMessage(), 0, null, $statusCode);
+        // Include status code in the message instead of as a separate parameter
+        $message = 'Ошибка при запросе: ' . $e->getMessage();
+        if ($statusCode) {
+            $message = "Ошибка при запросе (код {$statusCode}): " . $e->getMessage();
+        }
+        throw new Exception($message, 0, $e);
     } catch (Exception $e) {
         throw new Exception('Произошла ошибка: ' . $e->getMessage());
     }
