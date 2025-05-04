@@ -78,15 +78,15 @@
                                     <?php if (
                                         isset($url['last_check_created_at'])
                                         && $url['last_check_created_at'] !== null
-                                    ) : ?>
-                                        <?= formatDate($url['last_check_created_at']) ?>
+) : ?>
+                                                       <?= formatDate($url['last_check_created_at']) ?>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if (
                                         isset($url['last_check_status_code'])
                                         && $url['last_check_status_code'] !== null
-                                    ) : ?>
+) : ?>
                                         <?= getStatusBadge($url['last_check_status_code']) ?>
                                     <?php endif; ?>
                                 </td>

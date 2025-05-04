@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Main application entry point
  *
@@ -272,8 +273,8 @@ function findLatestUrlCheckByUrlId($urlId)
 function createUrlCheck($data)
 {
     $pdo = getPDO();
-    $sql = 'INSERT INTO url_checks (url_id, status_code, h1, title, description) 
-            VALUES (:url_id, :status_code, :h1, :title, :description) 
+    $sql = 'INSERT INTO url_checks (url_id, status_code, h1, title, description)
+            VALUES (:url_id, :status_code, :h1, :title, :description)
             RETURNING id';
 
     $stmt = $pdo->prepare($sql);
@@ -355,6 +356,10 @@ function analyzeUrl($url)
 // Helper functions for views
 function h($text)
 {
+    // Convert non-string inputs to string before passing to htmlspecialchars
+    if (!is_string($text)) {
+        $text = (string) $text;
+    }
     return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 }
 
