@@ -7,7 +7,6 @@ use DI\DependencyException;
 use DI\NotFoundException;
 use Slim\App as SlimApp;
 use Slim\Factory\AppFactory;
-use App\Config\Middleware;
 use Dotenv\Dotenv;
 use Exception;
 
@@ -98,7 +97,8 @@ class App
      */
     private function registerMiddleware(): void
     {
-        Middleware::register($this->app, $this->container);
+        $middlewareClass = \App\Config\Middleware::class;
+        $middlewareClass::register($this->app, $this->container);
     }
 
     /**

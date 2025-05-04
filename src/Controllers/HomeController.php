@@ -13,6 +13,6 @@ class HomeController extends Controller
             'title' => 'Анализатор страниц'
         ];
 
-        return $this->responseBuilder->view('home/index.twig', $params);
+        return $this->responseBuilder->view('index.twig', $params);
     }
 }
