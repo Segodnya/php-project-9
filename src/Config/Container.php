@@ -33,7 +33,7 @@ if ($_ENV['APP_ENV'] ?? 'development' === 'production') {
 }
 
 // Load controller definitions
-$controllerDefinitions = require __DIR__ . '/controllers.php';
+$controllerDefinitions = require __DIR__ . '/Controllers.php';
 
 // Define container definitions
 $containerBuilder->addDefinitions(array_merge([
