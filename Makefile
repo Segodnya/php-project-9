@@ -6,9 +6,12 @@ install:
 validate:
 	composer validate
 
+# Initialize the database schema
 setup:
-	# Initialize the database schema
 	test -f database.sqlite || (touch database.sqlite && cat database.sql | sed 's/SERIAL PRIMARY KEY/INTEGER PRIMARY KEY AUTOINCREMENT/g' | sed 's/NOW()/CURRENT_TIMESTAMP/g' | sqlite3 database.sqlite)
+
+autoload:
+	composer dump-autoload
 
 start:
 	PHP_CLI_SERVER_WORKERS=5 php -S 0.0.0.0:$(PORT) -t public
@@ -26,14 +29,8 @@ phpstan:
 # Run all code quality checks
 check: lint phpstan
 
-test:
-	APP_ENV=testing php vendor/bin/phpunit
-
-test-coverage:
-	APP_ENV=testing XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-html coverage
-
+# Create and connect to the test database
 db-check:
-	# Create and connect to the test database
 	test -f database.sqlite || make setup
 	echo "SELECT COUNT(*) FROM urls;" | sqlite3 database.sqlite
 

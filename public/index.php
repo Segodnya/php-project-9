@@ -38,11 +38,6 @@ function getPDO(): PDO
 {
     static $pdo = null;
 
-    // For test environment, use test PDO if provided
-    if (isset($GLOBALS['USE_TEST_PDO']) && $GLOBALS['USE_TEST_PDO'] && isset($GLOBALS['testPdo'])) {
-        return $GLOBALS['testPdo'];
-    }
-
     if ($pdo !== null) {
         return $pdo;
     }
@@ -546,144 +541,138 @@ function getStatusBadge(int $statusCode): string
     }
 }
 
-// Simple router
-if (isset($GLOBALS['USE_TEST_PDO']) && $GLOBALS['USE_TEST_PDO']) {
-    // Skip request handling and routing when in test mode
-    // This prevents errors when $_SERVER variables aren't available in tests
-} else {
-    // Only parse request data when not in test mode
-    $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
-    $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-    $parsedUri = parse_url((string) $requestUri, PHP_URL_PATH);
-    $requestUri = $parsedUri !== false ? (string) $parsedUri : '/';
+// Only parse request data when not in test mode
+$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+$requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$parsedUri = parse_url((string) $requestUri, PHP_URL_PATH);
+$requestUri = $parsedUri !== false ? (string) $parsedUri : '/';
 
-    // Routes handling
-    try {
-        // Route: GET /
-        if ($requestUri === '/' && $requestMethod === 'GET') {
+// Routes handling
+try {
+    // Route: GET /
+    if ($requestUri === '/' && $requestMethod === 'GET') {
+        include __DIR__ . '/views/index.php';
+        exit;
+    }
+
+    // Route: GET /urls
+    if ($requestUri === '/urls' && $requestMethod === 'GET') {
+        $urls = findAllUrls();
+
+        // Add the latest check data to each URL
+        foreach ($urls as &$url) {
+            if (isset($url['id']) && is_numeric($url['id'])) {
+                $latestCheck = findLatestUrlCheckByUrlId((int) $url['id']);
+                if ($latestCheck) {
+                    $url['last_check_created_at'] = $latestCheck['created_at'];
+                    $url['last_check_status_code'] = $latestCheck['status_code'];
+                }
+            }
+        }
+
+        include __DIR__ . '/views/urls/index.php';
+        exit;
+    }
+
+    // Route: POST /urls
+    if ($requestUri === '/urls' && $requestMethod === 'POST') {
+        $url = $_POST['url']['name'] ?? '';
+
+        try {
+            $normalizedUrl = validateUrl($url);
+            $existingUrl = findUrlByName($normalizedUrl);
+
+            if ($existingUrl) {
+                setFlashMessage('info', 'Страница уже существует');
+                header('Location: /urls/' . $existingUrl['id']);
+                exit;
+            }
+
+            $id = createUrl($normalizedUrl);
+            setFlashMessage('success', 'Страница успешно добавлена');
+            header('Location: /urls/' . $id);
+            exit;
+        } catch (InvalidArgumentException $e) {
+            setFlashMessage('danger', $e->getMessage());
+            http_response_code(422);
             include __DIR__ . '/views/index.php';
             exit;
         }
+    }
 
-        // Route: GET /urls
-        if ($requestUri === '/urls' && $requestMethod === 'GET') {
-            $urls = findAllUrls();
+    // Route: GET /urls/{id}
+    if (preg_match('#^/urls/(\d+)$#', (string) $requestUri, $matches) && $requestMethod === 'GET') {
+        $id = (int) $matches[1];
+        $url = findUrlById($id);
 
-            // Add the latest check data to each URL
-            foreach ($urls as &$url) {
-                if (isset($url['id']) && is_numeric($url['id'])) {
-                    $latestCheck = findLatestUrlCheckByUrlId((int) $url['id']);
-                    if ($latestCheck) {
-                        $url['last_check_created_at'] = $latestCheck['created_at'];
-                        $url['last_check_status_code'] = $latestCheck['status_code'];
-                    }
-                }
-            }
-
-            include __DIR__ . '/views/urls/index.php';
+        if (!$url) {
+            http_response_code(404);
+            include __DIR__ . '/views/errors/404.php';
             exit;
         }
 
-        // Route: POST /urls
-        if ($requestUri === '/urls' && $requestMethod === 'POST') {
-            $url = $_POST['url']['name'] ?? '';
+        $checks = findUrlChecksByUrlId($id);
+        include __DIR__ . '/views/urls/show.php';
+        exit;
+    }
 
-            try {
-                $normalizedUrl = validateUrl($url);
-                $existingUrl = findUrlByName($normalizedUrl);
+    // Route: POST /urls/{id}/checks
+    if (preg_match('#^/urls/(\d+)/checks$#', (string) $requestUri, $matches) && $requestMethod === 'POST') {
+        $id = (int) $matches[1];
+        $url = findUrlById($id);
 
-                if ($existingUrl) {
-                    setFlashMessage('info', 'Страница уже существует');
-                    header('Location: /urls/' . $existingUrl['id']);
-                    exit;
-                }
-
-                $id = createUrl($normalizedUrl);
-                setFlashMessage('success', 'Страница успешно добавлена');
-                header('Location: /urls/' . $id);
-                exit;
-            } catch (InvalidArgumentException $e) {
-                setFlashMessage('danger', $e->getMessage());
-                http_response_code(422);
-                include __DIR__ . '/views/index.php';
-                exit;
-            }
-        }
-
-        // Route: GET /urls/{id}
-        if (preg_match('#^/urls/(\d+)$#', (string) $requestUri, $matches) && $requestMethod === 'GET') {
-            $id = (int) $matches[1];
-            $url = findUrlById($id);
-
-            if (!$url) {
-                http_response_code(404);
-                include __DIR__ . '/views/errors/404.php';
-                exit;
-            }
-
-            $checks = findUrlChecksByUrlId($id);
-            include __DIR__ . '/views/urls/show.php';
+        if (!$url) {
+            http_response_code(404);
+            include __DIR__ . '/views/errors/404.php';
             exit;
         }
 
-        // Route: POST /urls/{id}/checks
-        if (preg_match('#^/urls/(\d+)/checks$#', (string) $requestUri, $matches) && $requestMethod === 'POST') {
-            $id = (int) $matches[1];
-            $url = findUrlById($id);
-
-            if (!$url) {
-                http_response_code(404);
-                include __DIR__ . '/views/errors/404.php';
-                exit;
+        try {
+            if (!isset($url['name']) || !is_string($url['name'])) {
+                throw new Exception('Invalid URL data: missing name');
             }
 
-            try {
-                if (!isset($url['name']) || !is_string($url['name'])) {
-                    throw new Exception('Invalid URL data: missing name');
-                }
+            $checkData = analyzeUrl($url['name']);
 
-                $checkData = analyzeUrl($url['name']);
+            $data = [
+                'url_id' => $id,
+                'status_code' => $checkData['status_code'],
+                'h1' => $checkData['h1'] ?? null,
+                'title' => $checkData['title'] ?? null,
+                'description' => $checkData['description'] ?? null
+            ];
 
-                $data = [
-                    'url_id' => $id,
-                    'status_code' => $checkData['status_code'],
-                    'h1' => $checkData['h1'] ?? null,
-                    'title' => $checkData['title'] ?? null,
-                    'description' => $checkData['description'] ?? null
-                ];
+            createUrlCheck($data);
+            setFlashMessage('success', 'Страница успешно проверена');
+        } catch (GuzzleHttp\Exception\RequestException $e) {
+            // Handle RequestException separately since it might have a response with status code
+            $statusCode = null;
+            $response = $e->getResponse();
+            if ($response !== null) {
+                $statusCode = $response->getStatusCode();
+            }
 
-                createUrlCheck($data);
-                setFlashMessage('success', 'Страница успешно проверена');
-            } catch (GuzzleHttp\Exception\RequestException $e) {
-                // Handle RequestException separately since it might have a response with status code
-                $statusCode = null;
-                $response = $e->getResponse();
-                if ($response !== null) {
-                    $statusCode = $response->getStatusCode();
-                }
-
-                if ($statusCode) {
-                    setFlashMessage(
-                        'danger',
-                        "Ошибка при проверке: HTTP код {$statusCode}. {$e->getMessage()}"
-                    );
-                } else {
-                    setFlashMessage('danger', "Ошибка при проверке: {$e->getMessage()}");
-                }
-            } catch (Exception $e) {
-                // Handle all other exceptions
+            if ($statusCode) {
+                setFlashMessage(
+                    'danger',
+                    "Ошибка при проверке: HTTP код {$statusCode}. {$e->getMessage()}"
+                );
+            } else {
                 setFlashMessage('danger', "Ошибка при проверке: {$e->getMessage()}");
             }
-
-            header('Location: /urls/' . $id);
-            exit;
+        } catch (Exception $e) {
+            // Handle all other exceptions
+            setFlashMessage('danger', "Ошибка при проверке: {$e->getMessage()}");
         }
 
-        // No route matched - 404
-        http_response_code(404);
-        include __DIR__ . '/views/errors/404.php';
-    } catch (Exception $e) {
-        http_response_code(500);
-        include __DIR__ . '/views/errors/500.php';
+        header('Location: /urls/' . $id);
+        exit;
     }
+
+    // No route matched - 404
+    http_response_code(404);
+    include __DIR__ . '/views/errors/404.php';
+} catch (Exception $e) {
+    http_response_code(500);
+    include __DIR__ . '/views/errors/500.php';
 }

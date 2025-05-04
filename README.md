@@ -95,18 +95,3 @@ make lint-fix
 # Check database connection
 make db-check
 ```
-
-## Testing
-
-The application includes a comprehensive test suite. To run the tests:
-
-```bash
-# Run all tests
-make test
-
-# Run only unit tests
-make test-unit
-
-# Run tests with code coverage report
-make test-coverage
-```

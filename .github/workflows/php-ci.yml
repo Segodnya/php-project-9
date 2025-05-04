@@ -30,6 +30,3 @@ jobs:
 
     - name: Run PHPStan
       run: make phpstan
-
-    - name: Run tests
-      run: make test

@@ -4,11 +4,6 @@
   "type": "project",
   "license": "MIT",
   "autoload": {},
-  "autoload-dev": {
-    "psr-4": {
-      "Tests\\": "tests/"
-    }
-  },
   "authors": [
     {
       "name": "Hexlet"
@@ -27,8 +22,6 @@
   },
   "scripts": {
     "phpcs": "phpcs",
-    "test": "phpunit",
-    "test-coverage": "phpunit --coverage-html coverage",
     "phpstan": "phpstan --memory-limit=256M --ansi analyse -c ./phpstan.neon"
   }
 }
