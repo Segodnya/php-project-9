@@ -135,7 +135,7 @@ function getFlashMessages()
 function validateUrl($url)
 {
     if (empty($url)) {
-        throw new InvalidArgumentException('URL cannot be empty');
+        throw new InvalidArgumentException('Некорректный URL');
     }
 
     // Check URL format
@@ -157,7 +157,7 @@ function normalizeUrl($url)
     $parsedUrl = parse_url($url);
 
     if (!isset($parsedUrl['scheme']) || !isset($parsedUrl['host'])) {
-        throw new InvalidArgumentException('Invalid URL format');
+        throw new InvalidArgumentException('Некорректный URL');
     }
 
     // Convert scheme to lowercase for checking
@@ -165,20 +165,20 @@ function normalizeUrl($url)
 
     // Check for valid scheme (only http and https are allowed)
     if (!in_array($scheme, ['http', 'https'])) {
-        throw new InvalidArgumentException('URL scheme must be http or https');
+        throw new InvalidArgumentException('Некорректный URL');
     }
 
     // Validate the host: it must have at least one dot to separate domain and TLD
     $host = strtolower($parsedUrl['host']);
     if (strpos($host, '.') === false) {
-        throw new InvalidArgumentException('Некорректный URL: hostname must include domain and TLD');
+        throw new InvalidArgumentException('Некорректный URL');
     }
 
     // Additional validation: TLD must be at least 2 characters
     $parts = explode('.', $host);
     $tld = end($parts);
     if (strlen($tld) < 2) {
-        throw new InvalidArgumentException('Некорректный URL: invalid top-level domain');
+        throw new InvalidArgumentException('Некорректный URL');
     }
 
     // Normalize to scheme://host
@@ -414,6 +414,7 @@ if (isset($GLOBALS['USE_TEST_PDO']) && $GLOBALS['USE_TEST_PDO']) {
                 exit;
             } catch (InvalidArgumentException $e) {
                 setFlashMessage('danger', $e->getMessage());
+                http_response_code(422);
                 include __DIR__ . '/views/index.php';
                 exit;
             }
