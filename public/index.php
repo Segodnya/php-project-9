@@ -1,4 +1,16 @@
 <?php
+/**
+ * Main application entry point
+ *
+ * This file contains both declarations and side effects.
+ * PHP version 8.0
+ *
+ * @category Application
+ * @package  PageAnalyzer
+ * @phpcs:ignoreFile PSR1.Files.SideEffects
+ */
+
+declare(strict_types=1);
 
 // Basic setup: error reporting and session
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
@@ -260,7 +272,11 @@ function findLatestUrlCheckByUrlId($urlId)
 function createUrlCheck($data)
 {
     $pdo = getPDO();
-    $stmt = $pdo->prepare('INSERT INTO url_checks (url_id, status_code, h1, title, description) VALUES (:url_id, :status_code, :h1, :title, :description) RETURNING id');
+    $sql = 'INSERT INTO url_checks (url_id, status_code, h1, title, description) 
+            VALUES (:url_id, :status_code, :h1, :title, :description) 
+            RETURNING id';
+
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([
         'url_id' => $data['url_id'],
         'status_code' => $data['status_code'],
@@ -310,7 +326,9 @@ function analyzeUrl($url)
 
                     // Extract meta description content
                     $descElement = $document->first('meta[name="description"]');
-                    $result['description'] = $descElement ? $descElement->getAttribute('content') : null;
+                    $result['description'] = $descElement
+                        ? $descElement->getAttribute('content')
+                        : null;
                 } catch (Exception $e) {
                     // Log parsing error but continue
                     error_log('HTML parsing error: ' . $e->getMessage());
@@ -465,7 +483,10 @@ if (isset($GLOBALS['USE_TEST_PDO']) && $GLOBALS['USE_TEST_PDO']) {
                 $statusCode = $e->hasResponse() ? $e->getResponse()->getStatusCode() : null;
 
                 if ($statusCode) {
-                    setFlashMessage('danger', "Ошибка при проверке: HTTP код {$statusCode}. {$e->getMessage()}");
+                    setFlashMessage(
+                        'danger',
+                        "Ошибка при проверке: HTTP код {$statusCode}. {$e->getMessage()}"
+                    );
                 } else {
                     setFlashMessage('danger', "Ошибка при проверке: {$e->getMessage()}");
                 }

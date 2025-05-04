@@ -5,6 +5,8 @@
 
 Page Analyzer is a web application that allows you to analyze specified pages for SEO suitability.
 
+https://php-project-9-zfib.onrender.com/
+
 ## Features
 
 - Add URLs to the system for analysis
@@ -23,7 +25,7 @@ Page Analyzer is a web application that allows you to analyze specified pages fo
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/yourusername/php-project-9.git
+git clone https://github.com/Segodnya/php-project-9.git
 cd php-project-9
 make install
 ```

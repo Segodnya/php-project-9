@@ -1,0 +1,38 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.{js,css,scss,html}]
+indent_size = 2
+
+[*.php]
+indent_size = 4
+max_line_length = 120
+
+# Match PSR-12 control structure spacing requirements
+[*.php]
+ij_php_space_after_type_cast = true
+ij_php_space_before_colon_in_return_type = false
+ij_php_space_after_colon_in_return_type = true
+ij_php_space_before_if_parentheses = true
+ij_php_space_after_if_parentheses = true
+ij_php_space_before_for_parentheses = true
+ij_php_space_after_for_parentheses = true
+ij_php_space_before_while_parentheses = true
+ij_php_space_after_while_parentheses = true
+ij_php_space_before_catch_parentheses = true
+ij_php_space_after_catch_parentheses = true
+ij_php_space_before_switch_parentheses = true
+ij_php_space_after_switch_parentheses = true

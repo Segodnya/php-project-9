@@ -14,10 +14,10 @@ start:
 	PHP_CLI_SERVER_WORKERS=5 php -S 0.0.0.0:$(PORT) -t public
 
 lint:
-	php -d error_reporting=E_ALL^E_DEPRECATED vendor/bin/phpcs --standard=PSR12 public
+	php -d error_reporting=E_ALL^E_DEPRECATED vendor/bin/phpcs --standard=phpcs.xml
 
 lint-fix:
-	php -d error_reporting=E_ALL^E_DEPRECATED vendor/bin/phpcbf --standard=PSR12 public
+	php -d error_reporting=E_ALL^E_DEPRECATED vendor/bin/phpcbf --standard=phpcs.xml
 
 test:
 	APP_ENV=testing php vendor/bin/phpunit
