@@ -1,35 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
-         colors="true"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
          cacheDirectory=".phpunit.cache"
-         executionOrder="random"
-         beStrictAboutOutputDuringTests="true"
-         beStrictAboutTodoAnnotatedTests="true"
-         failOnRisky="true"
-         displayDetailsOnTestsThatTriggerWarnings="true"
+         executionOrder="depends,defects"
          requireCoverageMetadata="false"
-         failOnWarning="false">
+         beStrictAboutCoverageMetadata="false"
+         beStrictAboutOutputDuringTests="false"
+         failOnRisky="false"
+         failOnWarning="true">
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
         </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
     </testsuites>
-    <coverage includeUncoveredFiles="true">
+
+    <source restrictDeprecations="true" restrictNotices="true" restrictWarnings="true">
         <include>
-            <directory suffix=".php">src</directory>
+            <directory>public</directory>
         </include>
-        <exclude>
-            <directory suffix=".php">src/Config</directory>
-            <directory suffix=".php">src/Routes</directory>
-        </exclude>
-        <report>
-            <html outputDirectory="coverage" lowUpperBound="50" highLowerBound="90"/>
-        </report>
-    </coverage>
+    </source>
+
     <php>
         <env name="APP_ENV" value="testing"/>
-        <env name="DATABASE_URL" value="sqlite::memory:"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
     </php>
 </phpunit> 
