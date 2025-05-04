@@ -1,5 +1,6 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/Segodnya/php-project-9/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Segodnya/php-project-9/actions)
+[![PHP CI](https://github.com/Segodnya/php-project-9/actions/workflows/php-ci.yml/badge.svg)](https://github.com/Segodnya/php-project-9/actions/workflows/php-ci.yml)
 
 # Page Analyzer
 
@@ -70,7 +71,7 @@ docker run -p 8080:8080 -e DATABASE_URL=postgresql://username:password@host:port
 
 ## Render.com Deployment
 
-This application is ready to be deployed on Render.com. 
+This application is ready to be deployed on Render.com.
 
 1. Create a new Web Service pointing to your repository
 2. Set the environment variable `DATABASE_URL` if you want to use PostgreSQL
