@@ -19,50 +19,70 @@ echo "Database URL: " . (isset($_ENV['DATABASE_URL']) ? $_ENV['DATABASE_URL'] : 
 try {
     // Try to get a database connection
     $pdo = DatabaseConnection::get();
-    
+
     // If we get here, the connection was successful
     echo "Connection successful!\n";
-    
+
     // Test executing a query
     $stmt = $pdo->query("SELECT current_timestamp as now");
     $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-    
+
     echo "Current database time: " . $result['now'] . "\n";
-    
+
+    // Check database type
+    $dbType = $pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+    echo "Database type: " . $dbType . "\n";
+
     // Check if tables exist
     echo "Checking database tables...\n";
-    $tables = $pdo->query("SELECT table_name FROM information_schema.tables WHERE table_schema='public'");
-    
+
     $foundTables = [];
-    while ($row = $tables->fetch(\PDO::FETCH_ASSOC)) {
-        $foundTables[] = $row['table_name'];
+
+    if ($dbType === 'sqlite') {
+        // SQLite specific query
+        $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
+        while ($row = $tables->fetch(\PDO::FETCH_ASSOC)) {
+            $foundTables[] = $row['name'];
+        }
+    } else {
+        // PostgreSQL specific query
+        $tables = $pdo->query("SELECT table_name FROM information_schema.tables WHERE table_schema='public'");
+        while ($row = $tables->fetch(\PDO::FETCH_ASSOC)) {
+            $foundTables[] = $row['table_name'];
+        }
     }
-    
+
     echo "Found tables: " . implode(", ", $foundTables) . "\n";
-    
+
     // Check if the required tables exist
     $requiredTables = ['urls', 'url_checks'];
     $missingTables = array_diff($requiredTables, $foundTables);
-    
+
     if (empty($missingTables)) {
         echo "All required tables exist!\n";
     } else {
         echo "Missing tables: " . implode(", ", $missingTables) . "\n";
-        echo "Please run the database migrations.\n";
+        echo "Please make sure the database schema is properly initialized.\n";
     }
-    
+
 } catch (Exception $e) {
     echo "Connection error: " . $e->getMessage() . "\n";
-    
+
     // If there's a previous exception, show that too
     if ($e->getPrevious()) {
         echo "Caused by: " . $e->getPrevious()->getMessage() . "\n";
     }
-    
+
     // Provide troubleshooting tips
     echo "\nTroubleshooting tips:\n";
-    echo "1. Make sure PostgreSQL is running\n";
-    echo "2. Check the DATABASE_URL environment variable is correct\n";
-    echo "3. If using Docker, ensure the postgres container is running\n";
-    echo "4. Try connecting to the database manually with: psql {your-database-url}\n";
-} 
+
+    if (isset($_ENV['DATABASE_URL'])) {
+        echo "1. Make sure your database server is running\n";
+        echo "2. Check the DATABASE_URL environment variable is correct\n";
+        echo "3. Try connecting to the database manually\n";
+    } else {
+        echo "1. Make sure the database.sql file exists in the project root\n";
+        echo "2. Check if the database.sqlite file is writable\n";
+        echo "3. Try removing the database.sqlite file and restart the application\n";
+    }
+}

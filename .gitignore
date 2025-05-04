@@ -12,6 +12,9 @@ composer.phar
 *.swp
 *.swo
 
+# SQLite database file
+database.sqlite
+
 # Docker
 .docker/
 docker-compose.override.yml
