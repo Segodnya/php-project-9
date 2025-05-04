@@ -258,8 +258,8 @@ function findUrlById(int $id): ?array
     $stmt = $pdo->prepare('SELECT * FROM urls WHERE id = :id');
     $stmt->execute(['id' => $id]);
 
-    $result = $stmt->fetch();
-    return $result ?: null;
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $result === false ? null : $result;
 }
 
 /**
@@ -274,8 +274,8 @@ function findUrlByName(string $name): ?array
     $stmt = $pdo->prepare('SELECT * FROM urls WHERE name = :name');
     $stmt->execute(['name' => $name]);
 
-    $result = $stmt->fetch();
-    return $result ?: null;
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $result === false ? null : $result;
 }
 
 /**
@@ -289,7 +289,8 @@ function findAllUrls(): array
     $stmt = $pdo->prepare('SELECT * FROM urls ORDER BY id DESC');
     $stmt->execute();
 
-    return $stmt->fetchAll();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $result;
 }
 
 /**
@@ -321,7 +322,8 @@ function findUrlChecksByUrlId(int $urlId): array
     $stmt = $pdo->prepare('SELECT * FROM url_checks WHERE url_id = :url_id ORDER BY id DESC');
     $stmt->execute(['url_id' => $urlId]);
 
-    return $stmt->fetchAll();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $result;
 }
 
 /**
@@ -336,8 +338,8 @@ function findLatestUrlCheckByUrlId(int $urlId): ?array
     $stmt = $pdo->prepare('SELECT * FROM url_checks WHERE url_id = :url_id ORDER BY id DESC LIMIT 1');
     $stmt->execute(['url_id' => $urlId]);
 
-    $result = $stmt->fetch();
-    return $result ?: null;
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $result === false ? null : $result;
 }
 
 /**
@@ -449,15 +451,30 @@ function analyzeUrl(string $url): array
 /**
  * HTML escape function
  *
- * @param string|mixed $text Text to escape
+ * @param mixed $text Text to escape
  * @return string HTML escaped text
  */
 function h(mixed $text): string
 {
+    // Handle null values
+    if ($text === null) {
+        return '';
+    }
+
     // Convert non-string inputs to string before passing to htmlspecialchars
     if (!is_string($text)) {
-        $text = (string) $text;
+        // Convert different types appropriately
+        if (is_bool($text)) {
+            $text = $text ? 'true' : 'false';
+        } elseif (is_array($text) || is_object($text)) {
+            // For arrays and objects, use json_encode for a safer representation
+            $text = json_encode($text) ?: '[Uncoded value]';
+        } else {
+            // For numbers and other scalar types
+            $text = (string) $text;
+        }
     }
+
     return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 }
 
@@ -469,7 +486,14 @@ function h(mixed $text): string
  */
 function formatDate(string $date): string
 {
+    if (empty($date)) {
+        return 'Invalid date';
+    }
+
     $timestamp = strtotime($date);
+    if ($timestamp === false) {
+        return 'Invalid date';
+    }
     return date('Y-m-d H:i:s', $timestamp);
 }
 
@@ -516,10 +540,12 @@ if (isset($GLOBALS['USE_TEST_PDO']) && $GLOBALS['USE_TEST_PDO']) {
 
             // Add the latest check data to each URL
             foreach ($urls as &$url) {
-                $latestCheck = findLatestUrlCheckByUrlId($url['id']);
-                if ($latestCheck) {
-                    $url['last_check_created_at'] = $latestCheck['created_at'];
-                    $url['last_check_status_code'] = $latestCheck['status_code'];
+                if (isset($url['id']) && is_numeric($url['id'])) {
+                    $latestCheck = findLatestUrlCheckByUrlId((int) $url['id']);
+                    if ($latestCheck) {
+                        $url['last_check_created_at'] = $latestCheck['created_at'];
+                        $url['last_check_status_code'] = $latestCheck['status_code'];
+                    }
                 }
             }
 
@@ -581,6 +607,10 @@ if (isset($GLOBALS['USE_TEST_PDO']) && $GLOBALS['USE_TEST_PDO']) {
             }
 
             try {
+                if (!isset($url['name']) || !is_string($url['name'])) {
+                    throw new Exception('Invalid URL data: missing name');
+                }
+
                 $checkData = analyzeUrl($url['name']);
 
                 $data = [

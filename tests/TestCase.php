@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use PHPUnit\Framework\TestCase as PHPUnitTestCase;
+use PHPUnit\Framework\TestCase as BaseTestCase;
 use PDO;
 
 /**
@@ -11,7 +11,7 @@ use PDO;
  * @requires extension PDO
  * @requires extension pdo_sqlite
  */
-abstract class TestCase extends PHPUnitTestCase
+abstract class TestCase extends BaseTestCase
 {
     protected function setUp(): void
     {

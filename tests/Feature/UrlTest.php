@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use PDO;
 
 /**
@@ -77,11 +77,14 @@ class UrlTest extends TestCase
         // Verify the URL was created with an ID
         $this->assertIsNumeric($id);
 
-        // Find the URL by ID
-        $url = findUrlById($id);
+        // Find the URL by ID and ensure we pass an int to the function
+        $url = null;
+        if (is_numeric($id)) {
+            $url = findUrlById((int) $id);
+        }
 
         // Verify the URL was found and has the correct name
         $this->assertNotNull($url);
-        $this->assertEquals($urlName, $url['name']);
+        $this->assertEquals($urlName, $url['name'] ?? null);
     }
 }
