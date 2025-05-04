@@ -9,13 +9,13 @@ Page Analyzer is available at [https://php-project-9-zfib.onrender.com/](https:/
 
 ## Requirements
 
-* PHP 8.1+ or Docker
+* PHP 8.3.20 or Docker
 * Composer (for local development)
 * PostgreSQL (for local development)
 
 ## Installation
 
-### Local Installation (requires PHP 8.4.6 and PostgreSQL)
+### Local Installation (requires PHP 8.3.20 and PostgreSQL)
 
 ```bash
 git clone https://github.com/Segodnya/php-project-9.git
@@ -38,7 +38,7 @@ make docker-build
 
 ## Usage
 
-### Running Locally (requires PHP 8.4.6 and PostgreSQL)
+### Running Locally (requires PHP 8.3.20 and PostgreSQL)
 
 ```bash
 # Make sure your PostgreSQL server is running

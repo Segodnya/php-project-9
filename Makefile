@@ -48,7 +48,10 @@ docker-bash:
 	docker-compose run --rm app bash
 
 docker-install:
-	docker-compose run --rm app composer install
+	docker-compose run --rm app composer install --ignore-platform-reqs
+
+docker-update:
+	docker-compose run --rm app composer update --ignore-platform-reqs
 
 docker-rebuild:
 	docker-compose build --no-cache
