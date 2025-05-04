@@ -29,7 +29,12 @@ try {
 }
 
 // Database connection function
-function getPDO()
+/**
+ * Get PDO database connection
+ *
+ * @return PDO Database connection
+ */
+function getPDO(): PDO
 {
     static $pdo = null;
 
@@ -105,14 +110,18 @@ function getPDO()
                     // Convert PostgreSQL SQL to SQLite compatible syntax
                     $sql = file_get_contents($sqlPath);
 
-                    // Replace PostgreSQL SERIAL with SQLite AUTOINCREMENT
-                    $sql = str_replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT', $sql);
+                    if ($sql !== false) {
+                        // Replace PostgreSQL SERIAL with SQLite AUTOINCREMENT
+                        $sql = str_replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT', $sql);
 
-                    // Replace PostgreSQL NOW() with SQLite CURRENT_TIMESTAMP
-                    $sql = str_replace('NOW()', 'CURRENT_TIMESTAMP', $sql);
+                        // Replace PostgreSQL NOW() with SQLite CURRENT_TIMESTAMP
+                        $sql = str_replace('NOW()', 'CURRENT_TIMESTAMP', $sql);
 
-                    // Execute the SQL statements
-                    $pdo->exec($sql);
+                        // Execute the SQL statements
+                        $pdo->exec($sql);
+                    } else {
+                        throw new RuntimeException('Failed to read database SQL file: ' . $sqlPath);
+                    }
                 } else {
                     throw new RuntimeException('Database SQL file not found: ' . $sqlPath);
                 }
@@ -129,7 +138,14 @@ function getPDO()
 }
 
 // Flash message functions
-function setFlashMessage($type, $message)
+/**
+ * Set a flash message to display on next request
+ *
+ * @param string $type Message type (success, danger, warning, info)
+ * @param string $message Message content
+ * @return void
+ */
+function setFlashMessage(string $type, string $message): void
 {
     if (!isset($_SESSION['flash_messages'])) {
         $_SESSION['flash_messages'] = [];
@@ -137,7 +153,12 @@ function setFlashMessage($type, $message)
     $_SESSION['flash_messages'][] = ['type' => $type, 'message' => $message];
 }
 
-function getFlashMessages()
+/**
+ * Get and clear flash messages
+ *
+ * @return array<int, array{type: string, message: string}> Flash messages
+ */
+function getFlashMessages(): array
 {
     $messages = $_SESSION['flash_messages'] ?? [];
     $_SESSION['flash_messages'] = [];
@@ -145,7 +166,14 @@ function getFlashMessages()
 }
 
 // URL validation
-function validateUrl($url)
+/**
+ * Validate a URL
+ *
+ * @param string $url URL to validate
+ * @throws InvalidArgumentException if URL is invalid
+ * @return string Normalized URL
+ */
+function validateUrl(string $url): string
 {
     if (empty($url)) {
         throw new InvalidArgumentException('Некорректный URL');
@@ -164,7 +192,14 @@ function validateUrl($url)
     return normalizeUrl($url);
 }
 
-function normalizeUrl($url)
+/**
+ * Normalize a URL to scheme://host format
+ *
+ * @param string $url URL to normalize
+ * @throws InvalidArgumentException if URL is invalid
+ * @return string Normalized URL
+ */
+function normalizeUrl(string $url): string
 {
     // Parse the URL
     $parsedUrl = parse_url($url);
@@ -211,7 +246,13 @@ function normalizeUrl($url)
 }
 
 // URL repository functions
-function findUrlById($id)
+/**
+ * Find a URL by its ID
+ *
+ * @param int $id URL ID
+ * @return array<string, mixed>|null URL data or null if not found
+ */
+function findUrlById(int $id): ?array
 {
     $pdo = getPDO();
     $stmt = $pdo->prepare('SELECT * FROM urls WHERE id = :id');
@@ -221,7 +262,13 @@ function findUrlById($id)
     return $result ?: null;
 }
 
-function findUrlByName($name)
+/**
+ * Find a URL by its name
+ *
+ * @param string $name URL name
+ * @return array<string, mixed>|null URL data or null if not found
+ */
+function findUrlByName(string $name): ?array
 {
     $pdo = getPDO();
     $stmt = $pdo->prepare('SELECT * FROM urls WHERE name = :name');
@@ -231,7 +278,12 @@ function findUrlByName($name)
     return $result ?: null;
 }
 
-function findAllUrls()
+/**
+ * Find all URLs
+ *
+ * @return array<int, array<string, mixed>> All URLs
+ */
+function findAllUrls(): array
 {
     $pdo = getPDO();
     $stmt = $pdo->prepare('SELECT * FROM urls ORDER BY id DESC');
@@ -240,18 +292,30 @@ function findAllUrls()
     return $stmt->fetchAll();
 }
 
-function createUrl($name)
+/**
+ * Create a new URL
+ *
+ * @param string $name URL name
+ * @return int|null New URL ID or null on failure
+ */
+function createUrl(string $name): ?int
 {
     $pdo = getPDO();
     $stmt = $pdo->prepare('INSERT INTO urls (name) VALUES (:name) RETURNING id');
     $stmt->execute(['name' => $name]);
 
     $id = $stmt->fetchColumn();
-    return $id ?: null;
+    return $id !== false ? (int) $id : null;
 }
 
 // URL check repository functions
-function findUrlChecksByUrlId($urlId)
+/**
+ * Find URL checks by URL ID
+ *
+ * @param int $urlId URL ID
+ * @return array<int, array<string, mixed>> URL check records
+ */
+function findUrlChecksByUrlId(int $urlId): array
 {
     $pdo = getPDO();
     $stmt = $pdo->prepare('SELECT * FROM url_checks WHERE url_id = :url_id ORDER BY id DESC');
@@ -260,7 +324,13 @@ function findUrlChecksByUrlId($urlId)
     return $stmt->fetchAll();
 }
 
-function findLatestUrlCheckByUrlId($urlId)
+/**
+ * Find the latest URL check by URL ID
+ *
+ * @param int $urlId URL ID
+ * @return array<string, mixed>|null URL check data or null if not found
+ */
+function findLatestUrlCheckByUrlId(int $urlId): ?array
 {
     $pdo = getPDO();
     $stmt = $pdo->prepare('SELECT * FROM url_checks WHERE url_id = :url_id ORDER BY id DESC LIMIT 1');
@@ -270,7 +340,13 @@ function findLatestUrlCheckByUrlId($urlId)
     return $result ?: null;
 }
 
-function createUrlCheck($data)
+/**
+ * Create a new URL check
+ *
+ * @param array<string, mixed> $data URL check data
+ * @return int|null New URL check ID or null on failure
+ */
+function createUrlCheck(array $data): ?int
 {
     $pdo = getPDO();
     $sql = 'INSERT INTO url_checks (url_id, status_code, h1, title, description)
@@ -287,11 +363,18 @@ function createUrlCheck($data)
     ]);
 
     $id = $stmt->fetchColumn();
-    return $id ?: null;
+    return $id !== false ? (int) $id : null;
 }
 
 // URL analysis function
-function analyzeUrl($url)
+/**
+ * Analyze a URL by fetching and parsing its content
+ *
+ * @param string $url URL to analyze
+ * @return array<string, mixed> Analysis result data
+ * @throws Exception on error
+ */
+function analyzeUrl(string $url): array
 {
     // Create a HTTP client with options
     $client = new GuzzleHttp\Client([
@@ -319,11 +402,14 @@ function analyzeUrl($url)
 
                     // Extract h1 tag content
                     $h1Element = $document->first('h1');
-                    $result['h1'] = $h1Element ? $h1Element->text() : null;
+                    // DiDom\Element has a text() method, but PHPStan doesn't know about it
+                    // Use a different approach that PHPStan can understand
+                    $result['h1'] = $h1Element ? trim($h1Element->text()) : null;
 
                     // Extract title tag content
                     $titleElement = $document->first('title');
-                    $result['title'] = $titleElement ? $titleElement->text() : null;
+                    // Same issue with text() method
+                    $result['title'] = $titleElement ? trim($titleElement->text()) : null;
 
                     // Extract meta description content
                     $descElement = $document->first('meta[name="description"]');
@@ -341,7 +427,13 @@ function analyzeUrl($url)
     } catch (GuzzleHttp\Exception\ConnectException $e) {
         throw new Exception('Не удалось подключиться к сайту');
     } catch (GuzzleHttp\Exception\RequestException $e) {
-        $statusCode = $e->hasResponse() ? $e->getResponse()->getStatusCode() : null;
+        // Check if a response is available before trying to get status code
+        $statusCode = null;
+        $response = $e->getResponse();
+        if ($response !== null) {
+            $statusCode = $response->getStatusCode();
+        }
+
         // Include status code in the message instead of as a separate parameter
         $message = 'Ошибка при запросе: ' . $e->getMessage();
         if ($statusCode) {
@@ -354,7 +446,13 @@ function analyzeUrl($url)
 }
 
 // Helper functions for views
-function h($text)
+/**
+ * HTML escape function
+ *
+ * @param string|mixed $text Text to escape
+ * @return string HTML escaped text
+ */
+function h(mixed $text): string
 {
     // Convert non-string inputs to string before passing to htmlspecialchars
     if (!is_string($text)) {
@@ -363,13 +461,25 @@ function h($text)
     return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 }
 
-function formatDate($date)
+/**
+ * Format a date string
+ *
+ * @param string $date Date string
+ * @return string Formatted date
+ */
+function formatDate(string $date): string
 {
     $timestamp = strtotime($date);
     return date('Y-m-d H:i:s', $timestamp);
 }
 
-function getStatusBadge($statusCode)
+/**
+ * Get a status badge HTML for a status code
+ *
+ * @param int $statusCode HTTP status code
+ * @return string HTML for the badge
+ */
+function getStatusBadge(int $statusCode): string
 {
     if ($statusCode >= 200 && $statusCode < 300) {
         return '<span class="badge bg-success">' . $statusCode . '</span>';
@@ -444,7 +554,7 @@ if (isset($GLOBALS['USE_TEST_PDO']) && $GLOBALS['USE_TEST_PDO']) {
         }
 
         // Route: GET /urls/{id}
-        if (preg_match('#^/urls/(\d+)$#', $requestUri, $matches) && $requestMethod === 'GET') {
+        if (preg_match('#^/urls/(\d+)$#', (string) $requestUri, $matches) && $requestMethod === 'GET') {
             $id = (int) $matches[1];
             $url = findUrlById($id);
 
@@ -460,7 +570,7 @@ if (isset($GLOBALS['USE_TEST_PDO']) && $GLOBALS['USE_TEST_PDO']) {
         }
 
         // Route: POST /urls/{id}/checks
-        if (preg_match('#^/urls/(\d+)/checks$#', $requestUri, $matches) && $requestMethod === 'POST') {
+        if (preg_match('#^/urls/(\d+)/checks$#', (string) $requestUri, $matches) && $requestMethod === 'POST') {
             $id = (int) $matches[1];
             $url = findUrlById($id);
 
@@ -485,7 +595,11 @@ if (isset($GLOBALS['USE_TEST_PDO']) && $GLOBALS['USE_TEST_PDO']) {
                 setFlashMessage('success', 'Страница успешно проверена');
             } catch (GuzzleHttp\Exception\RequestException $e) {
                 // Handle RequestException separately since it might have a response with status code
-                $statusCode = $e->hasResponse() ? $e->getResponse()->getStatusCode() : null;
+                $statusCode = null;
+                $response = $e->getResponse();
+                if ($response !== null) {
+                    $statusCode = $response->getStatusCode();
+                }
 
                 if ($statusCode) {
                     setFlashMessage(

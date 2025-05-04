@@ -4,7 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Сайт: <?= h($url['name']) ?> | Анализатор страниц</title>
+    <?php
+    // Ensure $url is always defined
+    $url = $url ?? [];
+    ?>
+    <title>Сайт: <?= h($url['name'] ?? '') ?> | Анализатор страниц</title>
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
         rel="stylesheet"
@@ -55,22 +59,22 @@
     <!-- Main Content -->
     <main class="flex-grow-1">
         <div class="container-lg mt-5">
-            <h1>Сайт: <?= h($url['name']) ?></h1>
+            <h1>Сайт: <?= h($url['name'] ?? '') ?></h1>
 
             <div class="table-responsive">
                 <table class="table table-bordered table-hover" data-test="url">
                     <tbody>
                         <tr>
                             <td>ID</td>
-                            <td><?= h($url['id']) ?></td>
+                            <td><?= h($url['id'] ?? '') ?></td>
                         </tr>
                         <tr>
                             <td>Имя</td>
-                            <td><?= h($url['name']) ?></td>
+                            <td><?= h($url['name'] ?? '') ?></td>
                         </tr>
                         <tr>
                             <td>Дата создания</td>
-                            <td><?= formatDate($url['created_at']) ?></td>
+                            <td><?= isset($url['created_at']) ? formatDate($url['created_at']) : '' ?></td>
                         </tr>
                     </tbody>
                 </table>
@@ -78,7 +82,7 @@
 
             <h2 class="mt-5">Проверки</h2>
             <div class="d-flex gap-2">
-                <form method="post" action="/urls/<?= h($url['id']) ?>/checks">
+                <form method="post" action="/urls/<?= h($url['id'] ?? '') ?>/checks">
                     <input type="submit" class="btn btn-primary" value="Запустить проверку">
                 </form>
                 <a href="/urls" class="btn btn-outline-primary">Вернуться</a>
@@ -97,7 +101,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($checks as $check) : ?>
+                        <?php
+                        // Ensure $checks is always defined
+                        $checks = $checks ?? [];
+                        foreach ($checks as $check) : ?>
                             <tr>
                                 <td><?= h($check['id']) ?></td>
                                 <td><?= getStatusBadge($check['status_code']) ?></td>

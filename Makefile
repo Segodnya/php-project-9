@@ -13,11 +13,18 @@ setup:
 start:
 	PHP_CLI_SERVER_WORKERS=5 php -S 0.0.0.0:$(PORT) -t public
 
+# Run only PHPCS linting
 lint:
 	php -d error_reporting=E_ALL^E_DEPRECATED vendor/bin/phpcs --standard=phpcs.xml
 
 lint-fix:
 	php -d error_reporting=E_ALL^E_DEPRECATED vendor/bin/phpcbf --standard=phpcs.xml
+
+phpstan:
+	php -d memory_limit=256M vendor/bin/phpstan analyse -c phpstan.neon
+
+# Run all code quality checks
+check: lint phpstan
 
 test:
 	APP_ENV=testing php vendor/bin/phpunit

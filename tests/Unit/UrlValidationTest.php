@@ -5,6 +5,10 @@ namespace Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 
+/**
+ * @requires extension PDO
+ * @requires extension pdo_sqlite
+ */
 class UrlValidationTest extends TestCase
 {
     protected function setUp(): void
@@ -37,7 +41,7 @@ class UrlValidationTest extends TestCase
     /**
      * @dataProvider validUrlsProvider
      */
-    public function testValidUrlsAreNormalized($inputUrl, $expectedUrl)
+    public function testValidUrlsAreNormalized(string $inputUrl, string $expectedUrl): void
     {
         $this->assertEquals($expectedUrl, normalizeUrl($inputUrl));
     }
@@ -45,13 +49,16 @@ class UrlValidationTest extends TestCase
     /**
      * @dataProvider invalidUrlsProvider
      */
-    public function testInvalidUrlsThrowException($invalidUrl)
+    public function testInvalidUrlsThrowException(string $invalidUrl): void
     {
         $this->expectException(InvalidArgumentException::class);
         normalizeUrl($invalidUrl);
     }
 
-    public function validUrlsProvider()
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function validUrlsProvider(): array
     {
         return [
             'simple url' => ['https://example.com', 'https://example.com'],
@@ -62,7 +69,10 @@ class UrlValidationTest extends TestCase
         ];
     }
 
-    public function invalidUrlsProvider()
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function invalidUrlsProvider(): array
     {
         return [
             'missing scheme' => ['example.com'],

@@ -3,9 +3,13 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
+use PDO;
 
 /**
  * Base test case class for all tests
+ *
+ * @requires extension PDO
+ * @requires extension pdo_sqlite
  */
 abstract class TestCase extends PHPUnitTestCase
 {
@@ -21,11 +25,13 @@ abstract class TestCase extends PHPUnitTestCase
 
     /**
      * Create an in-memory SQLite database for testing
+     *
+     * @return PDO SQLite PDO connection
      */
-    protected function createTestDatabase(): \PDO
+    protected function createTestDatabase(): PDO
     {
-        $pdo = new \PDO('sqlite::memory:');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $pdo = new PDO('sqlite::memory:');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         // Create tables with SQLite syntax
         $pdo->exec("

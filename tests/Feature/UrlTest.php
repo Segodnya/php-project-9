@@ -3,18 +3,23 @@
 namespace Tests\Feature;
 
 use PHPUnit\Framework\TestCase;
+use PDO;
 
+/**
+ * @requires extension PDO
+ * @requires extension pdo_sqlite
+ */
 class UrlTest extends TestCase
 {
-    private $pdo;
+    private PDO $pdo;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         // Create an in-memory SQLite database for testing
-        $this->pdo = new \PDO('sqlite::memory:');
-        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $this->pdo = new PDO('sqlite::memory:');
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         // Create tables with SQLite syntax
         $this->pdo->exec("

@@ -38,7 +38,12 @@ $GLOBALS['testPdo']->exec("
 ");
 
 // Create a function that returns the test PDO object
-function test_getPDO()
+/**
+ * Get the test PDO object
+ *
+ * @return PDO Test database connection
+ */
+function test_getPDO(): PDO
 {
     return $GLOBALS['testPdo'];
 }

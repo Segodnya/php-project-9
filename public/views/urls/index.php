@@ -68,25 +68,22 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($urls as $url) : ?>
+                        <?php
+                        // Ensure $urls is always defined
+                        $urls = $urls ?? [];
+                        foreach ($urls as $url) : ?>
                             <tr>
                                 <td><?= h($url['id']) ?></td>
                                 <td>
                                     <a href="/urls/<?= h($url['id']) ?>"><?= h($url['name']) ?></a>
                                 </td>
                                 <td>
-                                    <?php if (
-                                        isset($url['last_check_created_at'])
-                                        && $url['last_check_created_at'] !== null
-) : ?>
-                                                       <?= formatDate($url['last_check_created_at']) ?>
+                                    <?php if (isset($url['last_check_created_at'])) : ?>
+                                        <?= formatDate($url['last_check_created_at']) ?>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if (
-                                        isset($url['last_check_status_code'])
-                                        && $url['last_check_status_code'] !== null
-) : ?>
+                                    <?php if (isset($url['last_check_status_code'])) : ?>
                                         <?= getStatusBadge($url['last_check_status_code']) ?>
                                     <?php endif; ?>
                                 </td>
