@@ -45,7 +45,7 @@ make docker-build
 make start
 ```
 
-Then open http://localhost:8000 in your browser.
+Then open http://localhost:8080 in your browser.
 
 ### Running with Docker (recommended)
 
@@ -54,7 +54,7 @@ make docker-start
 ```
 
 This will start both the PHP application and a PostgreSQL database container.
-Then open http://localhost:8000 in your browser.
+Then open http://localhost:8080 in your browser.
 
 To access the application container shell:
 

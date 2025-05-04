@@ -1,4 +1,4 @@
-PORT ?= 8000
+PORT ?= 8080
 DB_URL ?= postgresql://postgres:mypassword@localhost:5432/mydb
 
 install:

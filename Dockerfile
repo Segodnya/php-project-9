@@ -48,7 +48,7 @@ if (file_exists("/app/vendor/composer/platform_check.php")) { \
 RUN touch .env
 
 # Expose the port the app runs on
-EXPOSE 8000
+EXPOSE 8080
 
 # Command to run the application
-CMD PHP_CLI_SERVER_WORKERS=5 php -S 0.0.0.0:8000 -t public
+CMD PHP_CLI_SERVER_WORKERS=5 php -S 0.0.0.0:8080 -t public
