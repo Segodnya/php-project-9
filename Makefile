@@ -5,7 +5,7 @@ install:
 	composer install
 
 start:
-	DATABASE_URL=$(shell echo $${DATABASE_URL:-$(DB_URL)}) PHP_CLI_SERVER_WORKERS=5 php -d error_reporting="E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" -S 0.0.0.0:$(PORT) -t public
+	docker-compose up
 
 lint:
 	php -d error_reporting=E_ALL^E_DEPRECATED vendor/bin/phpcs --standard=PSR12 public src
