@@ -34,7 +34,7 @@ abstract class TestCase extends PHPUnitTestCase
                 name VARCHAR(255) NOT NULL UNIQUE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
+
             CREATE TABLE url_checks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 url_id INTEGER REFERENCES urls(id),
@@ -44,7 +44,7 @@ abstract class TestCase extends PHPUnitTestCase
                 description TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
+
             CREATE INDEX urls_name_idx ON urls (name);
             CREATE INDEX url_checks_url_id_idx ON url_checks (url_id);
         ");

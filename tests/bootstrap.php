@@ -25,7 +25,7 @@ $GLOBALS['testPdo']->exec("
         name VARCHAR(255) NOT NULL UNIQUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
-    
+
     CREATE TABLE url_checks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         url_id INTEGER REFERENCES urls(id),
