@@ -8,12 +8,3 @@ parameters:
     # Add bootstrap files for autoloading
     bootstrapFiles:
         - vendor/autoload.php
-    # Tell PHPStan about test case methods
-    earlyTerminatingMethodCalls:
-        PHPUnit\Framework\TestCase:
-            - fail
-            - markTestIncomplete
-            - markTestSkipped
-
-includes:
-    - phpstan-baseline.neon

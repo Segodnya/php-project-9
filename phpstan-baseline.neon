@@ -1,6 +1,0 @@
-parameters:
-    ignoreErrors:
-        -
-            message: '#Call to an undefined method [a-zA-Z0-9\\_]+::(assertEquals|assertIsArray|assertCount|assertEmpty|assertArrayHasKey|assertEquals|assertNull|assertNotFalse|assertGreaterThan|assertMatchesRegularExpression|assertStringContainsString|expectException)\(\)\.#'
-            path: tests/*
-            reportUnmatched: false
