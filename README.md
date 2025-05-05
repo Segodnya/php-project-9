@@ -67,6 +67,9 @@ To manually run database migrations, use the provided script:
 # Run database migrations
 make migrate
 
+# Simulate migrations without executing them (dry-run)
+make migrate-dry-run
+
 # Or directly
 php run-migrations.php
 ```

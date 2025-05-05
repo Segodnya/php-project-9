@@ -14,6 +14,13 @@ setup:
 migrate:
 	php run-migrations.php
 
+# Dry run of migrations - show what would happen without executing
+migrate-dry-run:
+	@echo "Running migration dry-run (simulation) mode..."
+	@php -r '$$code = file_get_contents("run-migrations.php"); $$code = str_replace("$$pdo->exec($$statement);", "// Dry-run mode: $$statement; would be executed here", $$code); file_put_contents("run-migrations-dry.php", $$code);'
+	@php run-migrations-dry.php
+	@rm run-migrations-dry.php
+
 autoload:
 	composer dump-autoload
 

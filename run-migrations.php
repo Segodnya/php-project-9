@@ -88,8 +88,13 @@ try {
     echo "Connection successful!\n";
 
     // Test basic connectivity
-    $result = $pdo->query("SELECT 1 as test")->fetch();
-    echo "Database connectivity test: " . ($result['test'] ?? 'failed') . "\n";
+    $stmt = $pdo->query("SELECT 1 as test");
+    if ($stmt !== false) {
+        $result = $stmt->fetch();
+        echo "Database connectivity test: " . ($result['test'] ?? 'failed') . "\n";
+    } else {
+        echo "Database connectivity test failed.\n";
+    }
 
     // Load the SQL file
     $sqlPath = __DIR__ . '/database.sql';
@@ -113,17 +118,50 @@ try {
         array_map(
             'trim',
             explode(';', $sql)
-        )
+        ),
+        function ($statement) {
+            return $statement !== '';
+        }
     );
 
-    echo "Found " . count($statements) . " SQL statements to execute.\n\n";
+    $statementCount = count($statements);
+    echo "Found " . $statementCount . " SQL statement" . ($statementCount !== 1 ? 's' : '') . " to execute.\n\n";
+
+    if ($statementCount === 0) {
+        echo "No SQL statements found to execute. Exiting.\n";
+        exit(0);
+    }
 
     // Begin transaction for all migrations
     $pdo->beginTransaction();
 
     try {
+        // Validate SQL statements before executing them
+        echo "Validating SQL statements...\n";
+        $invalidStatements = 0;
+
         foreach ($statements as $index => $statement) {
-            if (empty($statement)) {
+            // Basic validation: ensure statements have minimum required keywords
+            $lowercaseStmt = strtolower($statement);
+            if (
+                !preg_match('/\b(create|alter|drop|insert|update|delete|select)\b/i', $lowercaseStmt) &&
+                !preg_match('/\b(table|index|constraint|trigger|view|function|sequence)\b/i', $lowercaseStmt)
+            ) {
+                echo "Warning: Statement [" . ($index + 1) . "] may not be valid SQL: " . substr($statement, 0, 50) . "...\n";
+                $invalidStatements++;
+            }
+        }
+
+        if ($invalidStatements > 0) {
+            echo "Found $invalidStatements potentially invalid SQL statements. Proceed with caution.\n";
+        } else {
+            echo "All statements appear to be valid SQL commands.\n";
+        }
+
+        echo "\nExecuting SQL statements...\n";
+        foreach ($statements as $index => $statement) {
+            // Skip empty statements (shouldn't happen due to array_filter above)
+            if ($statement === '') {
                 continue;
             }
 
@@ -155,37 +193,45 @@ try {
     // Show existing tables in the database
     echo "\nCurrent database structure:\n";
 
-    $tables = $pdo->query("
-        SELECT table_name
-        FROM information_schema.tables
-        WHERE table_schema = 'public'
-        ORDER BY table_name
-    ")->fetchAll();
+    try {
+        $tables = $pdo->query("
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            ORDER BY table_name
+        ")->fetchAll();
 
-    if (empty($tables)) {
-        echo "No tables found in the database.\n";
-    } else {
-        echo "Tables in database:\n";
-        foreach ($tables as $table) {
-            echo "- " . $table['table_name'] . "\n";
+        if (empty($tables)) {
+            echo "No tables found in the database.\n";
+        } else {
+            echo "Tables in database:\n";
+            foreach ($tables as $table) {
+                echo "- " . $table['table_name'] . "\n";
 
-            // Show columns for each table
-            $columns = $pdo->query("
-                SELECT column_name, data_type, character_maximum_length
-                FROM information_schema.columns
-                WHERE table_name = '{$table['table_name']}'
-                ORDER BY ordinal_position
-            ")->fetchAll();
+                // Show columns for each table
+                try {
+                    $columns = $pdo->query("
+                        SELECT column_name, data_type, character_maximum_length
+                        FROM information_schema.columns
+                        WHERE table_name = '{$table['table_name']}'
+                        ORDER BY ordinal_position
+                    ")->fetchAll();
 
-            foreach ($columns as $column) {
-                $type = $column['data_type'];
-                if ($column['character_maximum_length']) {
-                    $type .= "({$column['character_maximum_length']})";
+                    foreach ($columns as $column) {
+                        $type = $column['data_type'];
+                        if ($column['character_maximum_length']) {
+                            $type .= "({$column['character_maximum_length']})";
+                        }
+                        echo "  • {$column['column_name']} - {$type}\n";
+                    }
+                } catch (PDOException $e) {
+                    echo "  • Error reading columns: " . $e->getMessage() . "\n";
                 }
-                echo "  • {$column['column_name']} - {$type}\n";
+                echo "\n";
             }
-            echo "\n";
         }
+    } catch (PDOException $e) {
+        echo "Error reading database structure: " . $e->getMessage() . "\n";
     }
 
     echo "Migration process completed.\n";
