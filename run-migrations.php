@@ -160,11 +160,6 @@ try {
 
         echo "\nExecuting SQL statements...\n";
         foreach ($statements as $index => $statement) {
-            // Skip empty statements (shouldn't happen due to array_filter above)
-            if ($statement === '') {
-                continue;
-            }
-
             // Show a preview of the statement
             $preview = substr($statement, 0, 50) . (strlen($statement) > 50 ? '...' : '');
             echo "Executing [" . ($index + 1) . "]: " . $preview . "\n";
