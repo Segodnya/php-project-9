@@ -1,36 +1,27 @@
 {
-    "name": "hexlet/code",
-    "description": "Page Analyzer - a site that analyzes specified pages for SEO suitability",
-    "type": "project",
-    "license": "MIT",
-    "autoload": {
-        "files": []
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "authors": [
-        {
-            "name": "Hexlet"
-        }
-    ],
-    "require": {
-        "php": ">=8.0",
-        "vlucas/phpdotenv": "^5.5",
-        "guzzlehttp/guzzle": "^7.9",
-        "imangazaliev/didom": "^2.0"
-    },
-    "require-dev": {
-        "squizlabs/php_codesniffer": "^3.7",
-        "phpunit/phpunit": "^10.5",
-        "phpstan/phpstan": "^1.10"
-    },
-    "scripts": {
-        "phpcs": "phpcs",
-        "phpstan": "phpstan --memory-limit=256M --ansi analyse -c ./phpstan.neon",
-        "test": "phpunit",
-        "test-coverage": "phpunit --coverage-text"
+  "name": "hexlet/code",
+  "description": "Page Analyzer - a site that analyzes specified pages for SEO suitability",
+  "type": "project",
+  "license": "MIT",
+  "autoload": {},
+  "authors": [
+    {
+      "name": "Hexlet"
     }
+  ],
+  "require": {
+    "php": ">=8.0",
+    "vlucas/phpdotenv": "^5.5",
+    "guzzlehttp/guzzle": "^7.9",
+    "imangazaliev/didom": "^2.0"
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^3.7",
+    "phpunit/phpunit": "^10.5",
+    "phpstan/phpstan": "^1.10"
+  },
+  "scripts": {
+    "phpcs": "phpcs",
+    "phpstan": "phpstan --memory-limit=256M --ansi analyse -c ./phpstan.neon"
+  }
 }

@@ -40,14 +40,6 @@ phpstan:
 # Run all code quality checks
 check: lint phpstan
 
-# Run PHPUnit tests
-test:
-	php vendor/bin/phpunit
-
-# Run PHPUnit tests with coverage report
-test-coverage:
-	php vendor/bin/phpunit --coverage-text
-
 # Create and connect to the test database
 db-check:
 	test -f database.sqlite || make setup

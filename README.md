@@ -1,8 +1,6 @@
 ### Hexlet tests and linter status:
-
 [![Actions Status](https://github.com/Segodnya/php-project-9/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Segodnya/php-project-9/actions)
 [![PHP CI](https://github.com/Segodnya/php-project-9/actions/workflows/php-ci.yml/badge.svg)](https://github.com/Segodnya/php-project-9/actions/workflows/php-ci.yml)
-
 [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=Segodnya_php-project-9)](https://sonarcloud.io/summary/new_code?id=Segodnya_php-project-9)
 
 # Page Analyzer
@@ -115,38 +113,6 @@ make lint
 # Fix code style issues
 make lint-fix
 
-# Run PHPStan static analysis
-make phpstan
-
-# Run all code quality checks
-make check
-
-# Run PHPUnit tests
-make test
-
-# Run PHPUnit tests with coverage report
-make test-coverage
-
 # Check database connection
 make db-check
-```
-
-## Testing
-
-The project includes PHPUnit tests to ensure code quality and functionality. Tests are organized into:
-
-- **Unit Tests**: Test individual functions and components
-- **Functional Tests**: Test the application's behavior with external dependencies
-
-To run tests:
-
-```bash
-# Run all tests
-make test
-
-# Run tests with coverage report
-make test-coverage
-
-# Run specific test file
-php vendor/bin/phpunit tests/Unit/UrlTest.php
 ```
