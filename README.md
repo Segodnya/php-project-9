@@ -1,6 +1,7 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/Segodnya/php-project-9/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Segodnya/php-project-9/actions)
 [![PHP CI](https://github.com/Segodnya/php-project-9/actions/workflows/php-ci.yml/badge.svg)](https://github.com/Segodnya/php-project-9/actions/workflows/php-ci.yml)
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=Segodnya_php-project-9)](https://sonarcloud.io/summary/new_code?id=Segodnya_php-project-9)
 
 # Page Analyzer
 
@@ -14,6 +15,7 @@ https://php-project-9-zfib.onrender.com/
 - Check URLs for SEO parameters (status code, H1, title, description)
 - View the history of checks for each URL
 - Simple, single-file PHP application
+- Automatic database migrations on startup
 
 ## Requirements
 
@@ -49,11 +51,27 @@ Then open http://localhost:8080 in your browser.
 
 ### Production Deployment
 
-For production, configure the database connection using the `DATABASE_URL` environment variable:
+For production, configure the database connection using the `DATABASE_URL` environment variable in the `.env` file:
 
 ```
 DATABASE_URL=postgresql://username:password@host:port/database
 ```
+
+The application will automatically connect to the PostgreSQL database specified in the DATABASE_URL environment variable and run the necessary migrations from `database.sql` on startup.
+
+#### Database Migrations
+
+To manually run database migrations, use the provided script:
+
+```bash
+# Run database migrations
+make migrate
+
+# Or directly
+php run-migrations.php
+```
+
+Note: When running migrations on a Render.com database, you need to run this script from the same environment as your application, as Render.com databases may be configured to only accept connections from specific applications.
 
 ### Docker Deployment
 

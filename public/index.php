@@ -55,32 +55,62 @@ function getPDO(): PDO
             $username = $params['user'] ?? '';
             $password = $params['pass'] ?? '';
             $host = $params['host'] ?? '';
-            $port = $params['port'] ?? '';
+            $port = $params['port'] ?? '5432'; // Default PostgreSQL port
             $dbName = isset($params['path']) ? ltrim($params['path'], '/') : '';
 
             if (empty($driver) || empty($host) || empty($dbName)) {
                 throw new InvalidArgumentException('Missing required database connection parameters');
             }
 
-            // Map URL scheme to PDO driver
-            switch ($driver) {
-                case 'postgresql':
-                case 'postgres':
-                case 'pgsql':
-                    $pdoDriver = 'pgsql';
-                    break;
-                default:
-                    throw new InvalidArgumentException("Unsupported database driver: {$driver}");
+            // Debug connection parameters
+            if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
+                error_log('Database connection parameters:');
+                error_log("Driver: $driver");
+                error_log("Username: $username");
+                error_log("Password: " . (empty($password) ? 'Not provided' : 'Provided'));
+                error_log("Host: $host");
+                error_log("Port: $port");
+                error_log("Database: $dbName");
             }
 
-            $port = $port ? ";port={$port}" : '';
-            $dsn = "{$pdoDriver}:host={$host}{$port};dbname={$dbName}";
+            // Always use 'pgsql' as the PDO driver name for PostgreSQL
+            $pdoDriver = 'pgsql';
 
+            // Build the DSN with explicit port
+            $dsn = "{$pdoDriver}:host={$host};port={$port};dbname={$dbName}";
+
+            if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
+                error_log("DSN: $dsn");
+            }
+
+            // Make sure we're passing the username and password to PDO
             $pdo = new PDO($dsn, $username, $password, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES => false
             ]);
+
+            // Run migrations for PostgreSQL
+            try {
+                $sqlPath = dirname(__DIR__) . '/database.sql';
+                if (file_exists($sqlPath)) {
+                    $sql = file_get_contents($sqlPath);
+                    if ($sql !== false) {
+                        // Execute the SQL statements - PostgreSQL can handle the script as is
+                        $pdo->exec($sql);
+                    } else {
+                        throw new RuntimeException('Failed to read database SQL file: ' . $sqlPath);
+                    }
+                } else {
+                    throw new RuntimeException('Database SQL file not found: ' . $sqlPath);
+                }
+            } catch (PDOException $migrationException) {
+                // If tables already exist, we'll get an error but that's fine
+                // Log the error if in development mode
+                if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
+                    error_log('Migration error (can be ignored if tables exist): ' . $migrationException->getMessage());
+                }
+            }
         } else {
             // Use SQLite with local database.sqlite file in development
             $dbPath = dirname(__DIR__) . '/database.sqlite';

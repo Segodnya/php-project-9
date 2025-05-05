@@ -10,6 +10,10 @@ validate:
 setup:
 	test -f database.sqlite || (touch database.sqlite && cat database.sql | sed 's/SERIAL PRIMARY KEY/INTEGER PRIMARY KEY AUTOINCREMENT/g' | sed 's/NOW()/CURRENT_TIMESTAMP/g' | sqlite3 database.sqlite)
 
+# Run migrations on the PostgreSQL database (from DATABASE_URL)
+migrate:
+	php run-migrations.php
+
 autoload:
 	composer dump-autoload
 
