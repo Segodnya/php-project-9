@@ -15,7 +15,13 @@ declare(strict_types=1);
 
 // Basic setup: error reporting and session
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
-session_start();
+
+// Only start a session if we're not in a test environment
+if (!isset($_ENV['APP_ENV']) || $_ENV['APP_ENV'] !== 'testing') {
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+}
 
 // Load Composer's autoloader - we still need this for our dependencies
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -414,88 +420,100 @@ function createUrlCheck(array $data): ?int
     return $id !== false ? (int) $id : null;
 }
 
-// URL analysis function
+// URL analysis
 /**
- * Analyze a URL by fetching and parsing its content
+ * Analyze a URL for SEO metrics
  *
  * @param string $url URL to analyze
- * @return array<string, mixed> Analysis result data
- * @throws Exception on error
+ * @return array{status_code: int, h1: ?string, title: ?string, description: ?string} Analysis results
  */
 function analyzeUrl(string $url): array
 {
-    // Create a HTTP client with options
-    $client = new GuzzleHttp\Client([
-        'timeout' => 10,
-        'verify' => false,
-        'http_errors' => true,
-        'allow_redirects' => true
-    ]);
+    $client = createGuzzleClient();
 
     try {
         $response = $client->get($url);
         $statusCode = $response->getStatusCode();
 
-        $result = [
-            'status_code' => $statusCode
-        ];
+        // Parse HTML to extract SEO data
+        $h1 = null;
+        $title = null;
+        $description = null;
 
-        if ($statusCode === 200) {
-            $body = (string) $response->getBody();
+        $body = (string) $response->getBody();
 
-            // Skip parsing if body is empty
-            if (!empty($body)) {
-                try {
-                    $document = new DiDom\Document($body);
+        if (!empty($body)) {
+            $document = new DiDom\Document();
+            $document->loadHtml($body);
 
-                    // Extract h1 tag content
-                    $h1Element = $document->first('h1');
-                    // Use a safer approach with explicit null checking
-                    $result['h1'] = null;
-                    if ($h1Element instanceof DiDom\Element) {
-                        $result['h1'] = trim($h1Element->innerHtml());
-                    }
+            // Extract h1
+            $h1Elements = $document->find('h1');
+            if (!empty($h1Elements)) {
+                // Use DiDom's html() method
+                $element = $h1Elements[0];
+                if ($element instanceof DiDom\Element) {
+                    $h1 = trim($element->html());
+                }
+            }
 
-                    // Extract title tag content
-                    $titleElement = $document->first('title');
-                    // Use a safer approach with explicit null checking
-                    $result['title'] = null;
-                    if ($titleElement instanceof DiDom\Element) {
-                        $result['title'] = trim($titleElement->innerHtml());
-                    }
+            // Extract title
+            $titleElements = $document->find('title');
+            if (!empty($titleElements)) {
+                $element = $titleElements[0];
+                if ($element instanceof DiDom\Element) {
+                    $title = trim($element->html());
+                }
+            }
 
-                    // Extract meta description content
-                    $descElement = $document->first('meta[name="description"]');
-                    $result['description'] = $descElement
-                        ? $descElement->getAttribute('content')
-                        : null;
-                } catch (Exception $e) {
-                    // Log parsing error but continue
-                    error_log('HTML parsing error: ' . $e->getMessage());
+            // Extract description
+            $metaElements = $document->find('meta[name=description]');
+            if (!empty($metaElements)) {
+                $element = $metaElements[0];
+                if ($element instanceof DiDom\Element) {
+                    $description = $element->getAttribute('content');
                 }
             }
         }
 
-        return $result;
-    } catch (GuzzleHttp\Exception\ConnectException $e) {
-        throw new Exception('Не удалось подключиться к сайту');
-    } catch (GuzzleHttp\Exception\RequestException $e) {
-        // Check if a response is available before trying to get status code
-        $statusCode = null;
-        $response = $e->getResponse();
-        if ($response !== null) {
-            $statusCode = $response->getStatusCode();
-        }
-
-        // Include status code in the message instead of as a separate parameter
-        $message = 'Ошибка при запросе: ' . $e->getMessage();
-        if ($statusCode) {
-            $message = "Ошибка при запросе (код {$statusCode}): " . $e->getMessage();
-        }
-        throw new Exception($message, 0, $e);
+        return [
+            'status_code' => $statusCode,
+            'h1' => $h1,
+            'title' => $title,
+            'description' => $description
+        ];
+    } catch (GuzzleHttp\Exception\ClientException | GuzzleHttp\Exception\ServerException $e) {
+        // Handle HTTP errors
+        return [
+            'status_code' => $e->getResponse()->getStatusCode(),
+            'h1' => null,
+            'title' => null,
+            'description' => null
+        ];
     } catch (Exception $e) {
-        throw new Exception('Произошла ошибка: ' . $e->getMessage());
+        // Handle other errors
+        return [
+            'status_code' => 0,
+            'h1' => null,
+            'title' => null,
+            'description' => null
+        ];
     }
+}
+
+/**
+ * Create a Guzzle HTTP client with default configuration
+ *
+ * @return GuzzleHttp\Client Configured HTTP client
+ */
+function createGuzzleClient(): GuzzleHttp\Client
+{
+    return new GuzzleHttp\Client([
+        'timeout' => 10,
+        'connect_timeout' => 5,
+        'headers' => [
+            'User-Agent' => 'PageAnalyzer/1.0',
+        ]
+    ]);
 }
 
 // Helper functions for views
@@ -576,6 +594,12 @@ $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $parsedUri = parse_url((string) $requestUri, PHP_URL_PATH);
 $requestUri = $parsedUri !== false ? (string) $parsedUri : '/';
+
+// Skip route handling in test mode
+if (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'testing') {
+    // Don't process routes in test mode
+    return;
+}
 
 // Routes handling
 try {
