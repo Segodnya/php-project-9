@@ -39,7 +39,9 @@ if (!empty($basePath)) {
 }
 
 // Configure dependencies
-require_once __DIR__ . '/../src/dependencies.php';
+$dependenciesPath = __DIR__ . '/../src/dependencies.php';
+require_once $dependenciesPath;
+configureDependencies($app);
 
 // Add middleware
 require_once __DIR__ . '/../src/middleware.php';
