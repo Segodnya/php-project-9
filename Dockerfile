@@ -30,5 +30,7 @@ RUN mkdir -p var/data && chmod -R 777 var
 ENV PORT=8080
 EXPOSE 8080
 
-# Start command
-CMD php -S 0.0.0.0:$PORT -t public 
+# Start command - reset database before starting
+CMD if [ -f database.sqlite ]; then rm database.sqlite; fi && \
+    cat database.sql | sed 's/SERIAL PRIMARY KEY/INTEGER PRIMARY KEY AUTOINCREMENT/g' | sed 's/NOW()/CURRENT_TIMESTAMP/g' | sqlite3 database.sqlite && \
+    php -S 0.0.0.0:$PORT -t public

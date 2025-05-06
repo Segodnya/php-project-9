@@ -32,12 +32,6 @@ $container = new \DI\Container();
 // Create App
 $app = \Slim\Factory\AppFactory::create();
 
-// Set base path if needed (useful for subdirectory installations)
-$basePath = getenv('APP_BASE_PATH') ?: '';
-if (!empty($basePath)) {
-    $app->setBasePath($basePath);
-}
-
 // Configure dependencies
 $dependenciesPath = __DIR__ . '/../src/dependencies.php';
 require_once $dependenciesPath;

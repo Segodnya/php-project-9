@@ -14,6 +14,13 @@ setup:
 migrate:
 	php run-migrations.php
 
+# Reset the database by removing the existing one and recreating it
+reset-db:
+	@echo "Resetting database..."
+	@if [ -f database.sqlite ]; then rm database.sqlite; fi
+	@make setup
+	@echo "Database reset complete"
+
 # Dry run of migrations - show what would happen without executing
 migrate-dry-run:
 	@echo "Running migration dry-run (simulation) mode..."
@@ -24,7 +31,7 @@ migrate-dry-run:
 autoload:
 	composer dump-autoload
 
-start:
+start: reset-db
 	PHP_CLI_SERVER_WORKERS=5 php -S 0.0.0.0:$(PORT) -t public
 
 # Run only PHPCS linting
@@ -48,5 +55,5 @@ db-check:
 docker-build:
 	docker build -t page-analyzer .
 
-docker-run:
+docker-run: reset-db
 	docker run -p $(PORT):8080 -e DATABASE_URL=$(DATABASE_URL) page-analyzer
