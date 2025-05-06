@@ -15,12 +15,12 @@ https://php-project-9-zfib.onrender.com/
 - Add URLs to the system for analysis
 - Check URLs for SEO parameters (status code, H1, title, description)
 - View the history of checks for each URL
-- Simple, single-file PHP application
+- Modern MVC architecture with Slim framework
 - Automatic database migrations on startup
 
 ## Requirements
 
-* PHP 8.2 or higher
+* PHP 8.0 or higher
 * Composer
 * SQLite (for local development) or PostgreSQL (for production)
 
@@ -58,7 +58,7 @@ For production, configure the database connection using the `DATABASE_URL` envir
 DATABASE_URL=postgresql://username:password@host:port/database
 ```
 
-The application will automatically connect to the PostgreSQL database specified in the DATABASE_URL environment variable and run the necessary migrations from `database.sql` on startup.
+The application will automatically connect to the PostgreSQL database specified in the DATABASE_URL environment variable and run the necessary migrations on startup.
 
 #### Database Migrations
 
@@ -70,12 +70,7 @@ make migrate
 
 # Simulate migrations without executing them (dry-run)
 make migrate-dry-run
-
-# Or directly
-php run-migrations.php
 ```
-
-Note: When running migrations on a Render.com database, you need to run this script from the same environment as your application, as Render.com databases may be configured to only accept connections from specific applications.
 
 ### Docker Deployment
 
@@ -101,8 +96,15 @@ This application is ready to be deployed on Render.com.
 
 ## Project Structure
 
-- `public/index.php` - Main application file containing all the code
-- `views/` - HTML views
+- `public/index.php` - Main application entry point
+- `src/` - Application source code
+  - `Controllers/` - Route controllers
+  - `Services/` - Business logic services
+  - `Database/` - Database interaction
+  - `routes.php` - Route definitions
+  - `dependencies.php` - DI Container configuration
+  - `middleware.php` - Application middleware
+- `views/` - Twig templates
 - `database.sql` - SQL schema for the database
 
 ## Development
@@ -114,6 +116,15 @@ make lint
 # Fix code style issues
 make lint-fix
 
+# Run static analysis
+make phpstan
+
+# Run all code quality checks
+make check
+
 # Check database connection
 make db-check
+
+# Reset database to initial state
+make reset-db
 ```

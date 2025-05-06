@@ -123,8 +123,9 @@ class UrlController
                 ->withStatus(302);
         } catch (InvalidArgumentException $e) {
             $this->flash->addMessage('danger', $e->getMessage());
-            return $this->view
-                ->render($response->withStatus(422), 'index.twig');
+            return $response
+                ->withHeader('Location', $this->routeParser->urlFor('home'))
+                ->withStatus(302);
         }
     }
 

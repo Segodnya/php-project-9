@@ -206,6 +206,17 @@ class UrlService
             throw new InvalidArgumentException('Некорректный URL');
         }
 
+        // Trim whitespace
+        $url = trim($url);
+
+        // Direct check for malformed "http//" and "https//" (without colon)
+        if (
+            $url === 'http//' || $url === 'https//' ||
+            strpos($url, 'http//') === 0 || strpos($url, 'https//') === 0
+        ) {
+            throw new InvalidArgumentException('Некорректный URL');
+        }
+
         // Check URL format
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
             throw new InvalidArgumentException('Некорректный URL');
@@ -231,7 +242,7 @@ class UrlService
         // Parse the URL
         $parsedUrl = parse_url($url);
 
-        if (!isset($parsedUrl['scheme']) || !isset($parsedUrl['host'])) {
+        if ($parsedUrl === false || !isset($parsedUrl['scheme']) || !isset($parsedUrl['host'])) {
             throw new InvalidArgumentException('Некорректный URL');
         }
 
