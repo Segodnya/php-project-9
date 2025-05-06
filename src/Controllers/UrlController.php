@@ -22,7 +22,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Flash\Messages;
 use Slim\Interfaces\RouteParserInterface;
-use Slim\Views\PhpRenderer;
+use Slim\Views\Twig;
 
 /**
  * UrlController class
@@ -30,9 +30,9 @@ use Slim\Views\PhpRenderer;
 class UrlController
 {
     /**
-     * @var PhpRenderer $renderer
+     * @var Twig $view
      */
-    private PhpRenderer $renderer;
+    private Twig $view;
 
     /**
      * @var UrlService $urlService
@@ -57,20 +57,20 @@ class UrlController
     /**
      * Constructor
      *
-     * @param PhpRenderer          $renderer          View renderer
+     * @param Twig                 $view              View renderer
      * @param UrlService           $urlService        URL service
      * @param UrlCheckerService    $urlCheckerService URL checker service
      * @param Messages             $flash             Flash messages
      * @param RouteParserInterface $routeParser       Route parser
      */
     public function __construct(
-        PhpRenderer $renderer,
+        Twig $view,
         UrlService $urlService,
         UrlCheckerService $urlCheckerService,
         Messages $flash,
         RouteParserInterface $routeParser
     ) {
-        $this->renderer = $renderer;
+        $this->view = $view;
         $this->urlService = $urlService;
         $this->urlCheckerService = $urlCheckerService;
         $this->flash = $flash;
@@ -87,7 +87,7 @@ class UrlController
     public function index(Request $request, Response $response): Response
     {
         $urls = $this->urlService->findAllWithLatestChecks();
-        return $this->renderer->render($response, 'urls/index.php', [
+        return $this->view->render($response, 'urls/index.twig', [
             'urls' => $urls
         ]);
     }
@@ -123,8 +123,8 @@ class UrlController
                 ->withStatus(302);
         } catch (InvalidArgumentException $e) {
             $this->flash->addMessage('danger', $e->getMessage());
-            return $this->renderer
-                ->render($response->withStatus(422), 'index.php');
+            return $this->view
+                ->render($response->withStatus(422), 'index.twig');
         }
     }
 
@@ -142,13 +142,13 @@ class UrlController
         $url = $this->urlService->findById($id);
 
         if (!$url) {
-            return $this->renderer->render($response->withStatus(404), 'errors/404.php');
+            return $this->view->render($response->withStatus(404), 'errors/404.twig');
         }
 
         $checks = $this->urlService->findUrlChecks($id);
-        return $this->renderer->render(
+        return $this->view->render(
             $response,
-            'urls/show.php',
+            'urls/show.twig',
             [
                 'url' => $url,
                 'checks' => $checks
@@ -170,7 +170,7 @@ class UrlController
         $url = $this->urlService->findById($id);
 
         if (!$url) {
-            return $this->renderer->render($response->withStatus(404), 'errors/404.php');
+            return $this->view->render($response->withStatus(404), 'errors/404.twig');
         }
 
         try {

@@ -1,20 +1,23 @@
+{% extends "layout.twig" %}
+
+{% block content %}
 <div class="container-lg mt-5">
-    <h1>Сайт: <?= h($url['name'] ?? '') ?></h1>
+    <h1>Сайт: {{ url.name }}</h1>
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover" data-test="url">
             <tbody>
                 <tr>
                     <td>ID</td>
-                    <td><?= h($url['id'] ?? '') ?></td>
+                    <td>{{ url.id }}</td>
                 </tr>
                 <tr>
                     <td>Имя</td>
-                    <td><?= h($url['name'] ?? '') ?></td>
+                    <td>{{ url.name }}</td>
                 </tr>
                 <tr>
                     <td>Дата создания</td>
-                    <td><?= isset($url['created_at']) ? formatDate($url['created_at']) : '' ?></td>
+                    <td>{{ url.created_at is defined ? formatDate(url.created_at) : '' }}</td>
                 </tr>
             </tbody>
         </table>
@@ -22,7 +25,7 @@
 
     <h2 class="mt-5">Проверки</h2>
     <div class="d-flex gap-2">
-        <form method="post" action="/urls/<?= h($url['id'] ?? '') ?>/checks">
+        <form method="post" action="/urls/{{ url.id }}/checks">
             <input type="submit" class="btn btn-primary" value="Запустить проверку">
         </form>
         <a href="/urls" class="btn btn-outline-primary">Вернуться</a>
@@ -41,20 +44,18 @@
                 </tr>
             </thead>
             <tbody>
-                <?php
-                // Ensure $checks is always defined
-                $checks = $checks ?? [];
-                foreach ($checks as $check) : ?>
+                {% for check in checks %}
                     <tr>
-                        <td><?= h($check['id']) ?></td>
-                        <td><?= getStatusBadge($check['status_code']) ?></td>
-                        <td><?= h($check['h1']) ?></td>
-                        <td><?= h($check['title']) ?></td>
-                        <td><?= h($check['description']) ?></td>
-                        <td><?= formatDate($check['created_at']) ?></td>
+                        <td>{{ check.id }}</td>
+                        <td>{{ getStatusBadge(check.status_code)|raw }}</td>
+                        <td>{{ check.h1 }}</td>
+                        <td>{{ check.title }}</td>
+                        <td>{{ check.description }}</td>
+                        <td>{{ formatDate(check.created_at) }}</td>
                     </tr>
-                <?php endforeach; ?>
+                {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+{% endblock %}

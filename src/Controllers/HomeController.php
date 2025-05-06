@@ -16,7 +16,7 @@ namespace App\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Views\PhpRenderer;
+use Slim\Views\Twig;
 
 /**
  * HomeController class
@@ -24,18 +24,18 @@ use Slim\Views\PhpRenderer;
 class HomeController
 {
     /**
-     * @var PhpRenderer $renderer
+     * @var Twig $view
      */
-    private PhpRenderer $renderer;
+    private Twig $view;
 
     /**
      * Constructor
      *
-     * @param PhpRenderer $renderer View renderer
+     * @param Twig $view View renderer
      */
-    public function __construct(PhpRenderer $renderer)
+    public function __construct(Twig $view)
     {
-        $this->renderer = $renderer;
+        $this->view = $view;
     }
 
     /**
@@ -47,6 +47,6 @@ class HomeController
      */
     public function index(Request $request, Response $response): Response
     {
-        return $this->renderer->render($response, 'index.php');
+        return $this->view->render($response, 'index.twig');
     }
 }

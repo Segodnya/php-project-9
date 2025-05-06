@@ -22,6 +22,7 @@ docker-compose.override.yml
 # Cache directory
 /var/cache/
 /var/cache/proxies/
+/tmp/
 
 # Logs
 /var/logs/

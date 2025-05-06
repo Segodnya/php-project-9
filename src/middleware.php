@@ -13,7 +13,7 @@
 declare(strict_types=1);
 
 use Slim\App;
-use Slim\Views\PhpRenderer;
+use Slim\Views\Twig;
 
 /**
  * Setup application middleware
@@ -43,12 +43,12 @@ function setupMiddleware(App $app): void
         // Render the error template
         $statusCode = 500;
 
-        /** @var PhpRenderer $renderer */
-        $renderer = $container->get(PhpRenderer::class);
+        /** @var Twig $view */
+        $view = $container->get(Twig::class);
 
-        return $renderer->render(
+        return $view->render(
             $response->withStatus($statusCode),
-            'errors/500.php',
+            'errors/500.twig',
             [
                 'error' => $exception->getMessage()
             ]

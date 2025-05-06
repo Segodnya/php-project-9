@@ -41,25 +41,22 @@
     </header>
 
     <!-- Flash Messages -->
-    <?php if (isset($flash)): ?>
-        <?php $flashMessages = $flash(); ?>
-        <?php if ($flashMessages->hasMessages()): ?>
-            <div class="container-lg mt-3">
-                <?php foreach ($flashMessages->getMessages() as $type => $messages): ?>
-                    <?php foreach ($messages as $message): ?>
-                        <div class="alert alert-<?= h($type) ?> alert-dismissible fade show" role="alert">
-                            <?= h($message) ?>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    <?php endif; ?>
+    {% if flash.getMessages() is not empty %}
+        <div class="container-lg mt-3">
+            {% for type, messages in flash.getMessages() %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
 
     <!-- Main Content -->
     <main class="flex-grow-1">
-        <?= $content ?>
+        {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->

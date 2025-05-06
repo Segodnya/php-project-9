@@ -19,7 +19,8 @@ use App\Services\UrlService;
 use DI\Container;
 use Slim\Flash\Messages;
 use Slim\Interfaces\RouteParserInterface;
-use Slim\Views\PhpRenderer;
+use Slim\Views\Twig;
+use Twig\TwigFunction;
 
 /**
  * HTML escape function
@@ -111,37 +112,47 @@ $container->set(UrlCheckerService::class, function (Container $container) {
     return new UrlCheckerService($container->get(UrlService::class));
 });
 
-// Register PHP View Renderer
-$container->set(PhpRenderer::class, function (Container $container) {
+// Register Twig View Renderer
+$container->set(Twig::class, function (Container $container) {
     $viewsPath = dirname(__DIR__) . '/views';
-    $renderer = new PhpRenderer($viewsPath);
 
-    // Set default layout template
-    $renderer->setLayout('layout.php');
+    $isProduction = $_ENV['APP_ENV'] ?? 'development' === 'production';
+    $cachePath = $isProduction ? dirname(__DIR__) . '/tmp/cache' : false;
 
-    // Register global helper functions as attributes too
-    $renderer->addAttribute('h', 'h');
-    $renderer->addAttribute('formatDate', 'formatDate');
-    $renderer->addAttribute('getStatusBadge', 'getStatusBadge');
+    $twig = Twig::create($viewsPath, [
+        'cache' => $cachePath,
+        'debug' => !$isProduction
+    ]);
+
+    // Register global helper functions
+    $twig->getEnvironment()->addFunction(
+        new TwigFunction('h', 'h', ['is_safe' => ['html']])
+    );
+
+    $twig->getEnvironment()->addFunction(
+        new TwigFunction('formatDate', 'formatDate')
+    );
+
+    $twig->getEnvironment()->addFunction(
+        new TwigFunction('getStatusBadge', 'getStatusBadge', ['is_safe' => ['html']])
+    );
 
     // Add flash messages to all views
-    $renderer->addAttribute('flash', function () use ($container) {
-        return $container->get(Messages::class);
-    });
+    $twig->getEnvironment()->addGlobal('flash', $container->get(Messages::class));
 
-    return $renderer;
+    return $twig;
 });
 
 // Register Controllers
 $container->set(HomeController::class, function (Container $container) {
     return new HomeController(
-        $container->get(PhpRenderer::class)
+        $container->get(Twig::class)
     );
 });
 
 $container->set(UrlController::class, function (Container $container) {
     return new UrlController(
-        $container->get(PhpRenderer::class),
+        $container->get(Twig::class),
         $container->get(UrlService::class),
         $container->get(UrlCheckerService::class),
         $container->get(Messages::class),
