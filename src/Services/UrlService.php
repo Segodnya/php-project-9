@@ -213,7 +213,7 @@ class UrlService
 
         // Check URL length
         if (strlen($url) > 255) {
-            throw new InvalidArgumentException('URL cannot exceed 255 characters');
+            throw new InvalidArgumentException('Некорректный URL');
         }
 
         return $this->normalizeUrl($url);

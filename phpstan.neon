@@ -8,3 +8,4 @@ parameters:
     # Add bootstrap files for autoloading
     bootstrapFiles:
         - vendor/autoload.php
+        - phpstan-stubs.php
