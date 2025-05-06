@@ -36,13 +36,13 @@ start: reset-db
 
 # Run only PHPCS linting
 lint:
-	php -d vendor/bin/phpcs --standard=phpcs.xml
+	vendor/bin/phpcs --standard=phpcs.xml
 
 lint-fix:
-	php -d vendor/bin/phpcbf --standard=phpcs.xml
+	vendor/bin/phpcbf --standard=phpcs.xml
 
 phpstan:
-	php -d memory_limit=256M vendor/bin/phpstan analyse -c phpstan.neon
+	PHP_MEMORY_LIMIT=256M vendor/bin/phpstan analyse -c phpstan.neon
 
 # Run all code quality checks
 check: lint phpstan
