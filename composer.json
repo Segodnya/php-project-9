@@ -3,7 +3,11 @@
   "description": "Page Analyzer - a site that analyzes specified pages for SEO suitability",
   "type": "project",
   "license": "MIT",
-  "autoload": {},
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
   "authors": [
     {
       "name": "Hexlet"

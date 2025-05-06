@@ -20,6 +20,7 @@
 
     <!-- Paths to check -->
     <file>public</file>
+    <file>views</file>
 
     <!-- Exclude some files that don't need checking -->
     <exclude-pattern>*/vendor/*</exclude-pattern>

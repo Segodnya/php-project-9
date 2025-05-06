@@ -29,10 +29,10 @@ start:
 
 # Run only PHPCS linting
 lint:
-	php -d error_reporting=E_ALL^E_DEPRECATED vendor/bin/phpcs --standard=phpcs.xml
+	php -d vendor/bin/phpcs --standard=phpcs.xml
 
 lint-fix:
-	php -d error_reporting=E_ALL^E_DEPRECATED vendor/bin/phpcbf --standard=phpcs.xml
+	php -d vendor/bin/phpcbf --standard=phpcs.xml
 
 phpstan:
 	php -d memory_limit=256M vendor/bin/phpstan analyse -c phpstan.neon

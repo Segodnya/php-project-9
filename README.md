@@ -101,7 +101,7 @@ This application is ready to be deployed on Render.com.
 ## Project Structure
 
 - `public/index.php` - Main application file containing all the code
-- `public/views/` - HTML views
+- `views/` - HTML views
 - `database.sql` - SQL schema for the database
 
 ## Development

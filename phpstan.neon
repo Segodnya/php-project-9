@@ -2,6 +2,7 @@ parameters:
     level: 9
     paths:
         - public
+        - views
     excludePaths:
         - vendor
     # Add bootstrap files for autoloading
