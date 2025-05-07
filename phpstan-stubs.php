@@ -15,7 +15,10 @@ if (!function_exists('configureDependencies')) {
      * @param \Slim\App $app The Slim application instance
      * @return void
      */
-    function configureDependencies(\Slim\App $app): void {}
+    function configureDependencies(\Slim\App $app): void
+    {
+        // Mock function
+    }
 }
 
 if (!function_exists('setupMiddleware')) {
@@ -25,5 +28,8 @@ if (!function_exists('setupMiddleware')) {
      * @param \Slim\App $app Slim application instance
      * @return void
      */
-    function setupMiddleware(\Slim\App $app): void {}
+    function setupMiddleware(\Slim\App $app): void
+    {
+        // Mock function
+    }
 }
