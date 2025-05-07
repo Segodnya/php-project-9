@@ -139,7 +139,7 @@ function configureDependencies(App $app): void
 
         $twig = Twig::create($viewsPath, [
             'cache' => $cachePath,
-            'debug' => !$isProduction
+            'debug' => $isProduction ? false : true
         ]);
 
         // Register global helper functions

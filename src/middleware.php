@@ -12,7 +12,9 @@
 
 declare(strict_types=1);
 
+use DI\Container;
 use Slim\App;
+use Slim\Handlers\ErrorHandler;
 use Slim\Views\Twig;
 
 /**
@@ -33,6 +35,7 @@ function setupMiddleware(App $app): void
     );
 
     // Add custom error handler
+    /** @var ErrorHandler $errorHandler */
     $errorHandler = $errorMiddleware->getDefaultErrorHandler();
     $errorHandler->registerErrorRenderer('text/html', function ($exception, $request) use ($container) {
         $response = new \Slim\Psr7\Response();
@@ -43,13 +46,7 @@ function setupMiddleware(App $app): void
         // Render the error template
         $statusCode = 500;
 
-        if ($container === null) {
-            // Fallback response if container is not available
-            $response->getBody()->write('Internal Server Error');
-            return $response->withStatus($statusCode);
-        }
-
-        /** @var Twig $view */
+        /** @var Container $container */
         $view = $container->get(Twig::class);
 
         return $view->render(
