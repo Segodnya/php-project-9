@@ -103,6 +103,7 @@ function configureDependencies(App $app): void
     /** @var Container $container */
     $container = $app->getContainer();
 
+    /** @phpstan-ignore-next-line */
     if (!$container) {
         throw new \RuntimeException('Container not available');
     }
