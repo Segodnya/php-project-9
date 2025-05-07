@@ -4,7 +4,7 @@
 <div class="container-lg mt-5">
     <h1>Сайт: {{ url.name }}</h1>
 
-    {% include "partials/url_details.twig" with {'data_test': 'url'} %}
+    {% include "partials/url_details.twig" with {'data_test': 'url', 'include_header': true} %}
 
     <h2 class="mt-5">Проверки</h2>
     <div class="d-flex gap-2">

@@ -3,7 +3,13 @@
         {% if include_header is defined and include_header %}
             <thead>
                 <tr>
-                    {% block table_header %}{% endblock %}
+                    {% block table_header %}
+                        {% if headers is defined %}
+                            {% for header in headers %}
+                                <th>{{ header }}</th>
+                            {% endfor %}
+                        {% endif %}
+                    {% endblock %}
                 </tr>
             </thead>
         {% endif %}
