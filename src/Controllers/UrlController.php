@@ -124,8 +124,8 @@ class UrlController
         } catch (InvalidArgumentException $e) {
             $this->flash->addMessage('danger', $e->getMessage());
             return $response
-                ->withHeader('Location', $this->routeParser->urlFor('home'))
-                ->withStatus(302);
+                ->withHeader('Location', $this->routeParser->urlFor('urls.index'))
+                ->withStatus(422);
         }
     }
 
