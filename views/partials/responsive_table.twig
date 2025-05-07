@@ -1,0 +1,14 @@
+<div class="table-responsive{% if extra_class is defined %} {{ extra_class }}{% endif %}">
+    <table class="table table-bordered table-hover" {% if data_test is defined %}data-test="{{ data_test }}"{% endif %}>
+        {% if include_header is defined and include_header %}
+            <thead>
+                <tr>
+                    {% block table_header %}{% endblock %}
+                </tr>
+            </thead>
+        {% endif %}
+        <tbody>
+            {% block table_body %}{% endblock %}
+        </tbody>
+    </table>
+</div>
