@@ -12,7 +12,7 @@ if (!function_exists('configureDependencies')) {
     /**
      * Configure application dependencies
      *
-     * @param \Slim\App $app The Slim application instance
+     * @param \Slim\App<\DI\Container> $app The Slim application instance
      * @return void
      */
     function configureDependencies(\Slim\App $app): void
@@ -25,7 +25,7 @@ if (!function_exists('setupMiddleware')) {
     /**
      * Setup application middleware
      *
-     * @param \Slim\App $app Slim application instance
+     * @param \Slim\App<\DI\Container> $app Slim application instance
      * @return void
      */
     function setupMiddleware(\Slim\App $app): void

@@ -18,7 +18,7 @@ use Slim\Views\Twig;
 /**
  * Setup application middleware
  *
- * @param App $app Slim application instance
+ * @param App<\DI\Container> $app Slim application instance
  * @return void
  */
 function setupMiddleware(App $app): void
@@ -42,6 +42,12 @@ function setupMiddleware(App $app): void
 
         // Render the error template
         $statusCode = 500;
+
+        if ($container === null) {
+            // Fallback response if container is not available
+            $response->getBody()->write('Internal Server Error');
+            return $response->withStatus($statusCode);
+        }
 
         /** @var Twig $view */
         $view = $container->get(Twig::class);

@@ -30,6 +30,7 @@ $container = new \DI\Container();
 \Slim\Factory\AppFactory::setContainer($container);
 
 // Create App
+/** @var \Slim\App<\DI\Container> $app */
 $app = \Slim\Factory\AppFactory::create();
 
 // Configure dependencies

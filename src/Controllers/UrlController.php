@@ -102,7 +102,7 @@ class UrlController
     public function store(Request $request, Response $response): Response
     {
         $data = $request->getParsedBody();
-        $url = $data['url']['name'] ?? '';
+        $url = is_array($data) && isset($data['url']) && is_array($data['url']) ? $data['url']['name'] ?? '' : '';
 
         try {
             $normalizedUrl = $this->urlService->validateUrl($url);
@@ -111,7 +111,7 @@ class UrlController
             if ($existingUrl) {
                 $this->flash->addMessage('info', 'Страница уже существует');
                 return $response
-                    ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => $existingUrl['id']]))
+                    ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => (string)$existingUrl['id']]))
                     ->withStatus(302);
             }
 
@@ -119,7 +119,7 @@ class UrlController
             $this->flash->addMessage('success', 'Страница успешно добавлена');
 
             return $response
-                ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => $id]))
+                ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => (string)$id]))
                 ->withStatus(302);
         } catch (InvalidArgumentException $e) {
             $this->flash->addMessage('danger', 'Некорректный URL');
@@ -192,7 +192,7 @@ class UrlController
         }
 
         return $response
-            ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => $id]))
+            ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => (string)$id]))
             ->withStatus(302);
     }
 }
