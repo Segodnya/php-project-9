@@ -122,10 +122,16 @@ class UrlController
                 ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => $id]))
                 ->withStatus(302);
         } catch (InvalidArgumentException $e) {
-            $this->flash->addMessage('danger', $e->getMessage());
-            return $response
-                ->withHeader('Location', $this->routeParser->urlFor('urls.index'))
-                ->withStatus(302);
+            $this->flash->addMessage('danger', 'Некорректный URL');
+
+            return $this->view->render(
+                $response->withStatus(422),
+                'urls/error.twig',
+                [
+                    'validationError' => $e->getMessage(),
+                    'urlInput' => $url
+                ]
+            );
         }
     }
 

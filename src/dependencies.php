@@ -99,15 +99,12 @@ function configureDependencies(App $app): void
      */
     function getStatusBadge(int $statusCode): string
     {
-        if ($statusCode >= 200 && $statusCode < 300) {
-            return '<span class="badge bg-success">' . $statusCode . '</span>';
-        } elseif ($statusCode >= 300 && $statusCode < 400) {
-            return '<span class="badge bg-info">' . $statusCode . '</span>';
-        } elseif ($statusCode >= 400 && $statusCode < 500) {
-            return '<span class="badge bg-warning">' . $statusCode . '</span>';
-        } else {
-            return '<span class="badge bg-danger">' . $statusCode . '</span>';
-        }
+        return match (true) {
+            $statusCode >= 200 && $statusCode < 300 => "<span class=\"badge bg-success\">{$statusCode}</span>",
+            $statusCode >= 300 && $statusCode < 400 => "<span class=\"badge bg-info\">{$statusCode}</span>",
+            $statusCode >= 400 && $statusCode < 500 => "<span class=\"badge bg-warning\">{$statusCode}</span>",
+            default => "<span class=\"badge bg-danger\">{$statusCode}</span>",
+        };
     }
 
     // Register Flash messages
