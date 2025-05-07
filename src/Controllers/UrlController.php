@@ -125,7 +125,7 @@ class UrlController
             $this->flash->addMessage('danger', $e->getMessage());
             return $response
                 ->withHeader('Location', $this->routeParser->urlFor('urls.index'))
-                ->withStatus(422);
+                ->withStatus(302);
         }
     }
 
