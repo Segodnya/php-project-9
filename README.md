@@ -128,3 +128,28 @@ make db-check
 # Reset database to initial state
 make reset-db
 ```
+
+## Error Handling
+
+The application implements a robust error handling approach:
+
+1. **Generic User Messages**: When errors occur, users only see generic error messages to avoid exposing sensitive information.
+
+2. **Comprehensive Logging**: Detailed error information including exception stack traces is logged to:
+   - In development: The standard PHP error log
+   - In production: A dedicated app.log file in the `/logs` directory
+
+3. **Using the Logger Service**: The application provides a centralized `LoggerService` for consistent logging throughout the codebase:
+
+```php
+// Example of logging an error with exception details
+$this->logger->error('Error message', $exception);
+
+// Example of logging an informational message
+$this->logger->info('Information message');
+
+// Example of logging a warning
+$this->logger->warning('Warning message');
+```
+
+This approach ensures that developers have access to detailed error information for debugging while maintaining security by not exposing sensitive details to end users.

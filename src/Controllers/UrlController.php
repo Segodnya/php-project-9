@@ -16,6 +16,7 @@ namespace App\Controllers;
 
 use App\Services\UrlService;
 use App\Services\UrlCheckerService;
+use App\Services\LoggerService;
 use Exception;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -61,6 +62,11 @@ class UrlController
     private SlimResponse $slimResponse;
 
     /**
+     * @var LoggerService $logger
+     */
+    private LoggerService $logger;
+
+    /**
      * Constructor
      *
      * @param Twig                 $view              View renderer
@@ -69,6 +75,7 @@ class UrlController
      * @param Messages             $flash             Flash messages
      * @param RouteParserInterface $routeParser       Route parser
      * @param SlimResponse         $slimResponse      Slim HTTP Response
+     * @param LoggerService        $logger            Logger service
      */
     public function __construct(
         Twig $view,
@@ -76,7 +83,8 @@ class UrlController
         UrlCheckerService $urlCheckerService,
         Messages $flash,
         RouteParserInterface $routeParser,
-        SlimResponse $slimResponse
+        SlimResponse $slimResponse,
+        LoggerService $logger
     ) {
         $this->view = $view;
         $this->urlService = $urlService;
@@ -84,6 +92,7 @@ class UrlController
         $this->flash = $flash;
         $this->routeParser = $routeParser;
         $this->slimResponse = $slimResponse;
+        $this->logger = $logger;
     }
 
     /**
@@ -195,7 +204,9 @@ class UrlController
             $this->urlCheckerService->check($id, $url['name']);
             $this->flash->addMessage('success', 'Страница успешно проверена');
         } catch (Exception $e) {
-            $this->flash->addMessage('danger', 'Ошибка при проверке: ' . $e->getMessage());
+            $this->logger->error('URL check error for ID: ' . $id, $e);
+
+            $this->flash->addMessage('danger', 'Произошла ошибка при проверке страницы');
         }
 
         return $this->slimResponse->withRedirect(

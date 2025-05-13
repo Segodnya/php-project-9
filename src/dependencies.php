@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 use App\Controllers\HomeController;
 use App\Controllers\UrlController;
+use App\Services\LoggerService;
 use App\Services\UrlCheckerService;
 use App\Services\UrlService;
 use DI\Container;
@@ -156,6 +157,23 @@ function configureDependencies(App $app): void
         return new UrlCheckerService($container->get(UrlService::class));
     });
 
+    // Register Logger Service
+    $container->set(LoggerService::class, function (Container $container) {
+        $logPath = null;
+
+        // Define a custom log path for production environment
+        if (($_ENV['APP_ENV'] ?? 'development') === 'production') {
+            $logDir = dirname(__DIR__) . '/logs';
+            // Create logs directory if it doesn't exist
+            if (!is_dir($logDir) && !mkdir($logDir, 0755, true) && !is_dir($logDir)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $logDir));
+            }
+            $logPath = $logDir . '/app.log';
+        }
+
+        return new LoggerService($logPath);
+    });
+
     // Register Twig View Renderer
     $container->set(Twig::class, function (Container $container) {
         $viewsPath = dirname(__DIR__) . '/views';
@@ -201,7 +219,8 @@ function configureDependencies(App $app): void
             $container->get(UrlCheckerService::class),
             $container->get(Messages::class),
             $container->get(RouteParserInterface::class),
-            $container->get(Response::class)
+            $container->get(Response::class),
+            $container->get(LoggerService::class)
         );
     });
 }
