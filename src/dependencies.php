@@ -29,7 +29,7 @@ use Twig\TwigFunction;
  * @param mixed $text Text to escape
  * @return string HTML escaped text
  */
-function h(mixed $text): string
+function escapeHtml(mixed $text): string
 {
     // Handle null values
     if ($text === null) {
@@ -145,7 +145,7 @@ function configureDependencies(App $app): void
 
         // Register global helper functions
         $twig->getEnvironment()->addFunction(
-            new TwigFunction('h', 'h', ['is_safe' => ['html']])
+            new TwigFunction('h', 'escapeHtml', ['is_safe' => ['html']])
         );
 
         $twig->getEnvironment()->addFunction(
