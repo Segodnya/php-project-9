@@ -106,24 +106,8 @@ class UrlController
 
         try {
             $normalizedUrl = $this->urlService->validateUrl($url);
-            $existingUrl = $this->urlService->findByName($normalizedUrl);
-
-            if ($existingUrl) {
-                $this->flash->addMessage('info', 'Страница уже существует');
-                return $response
-                    ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => (string)$existingUrl['id']]))
-                    ->withStatus(302);
-            }
-
-            $id = $this->urlService->create($normalizedUrl);
-            $this->flash->addMessage('success', 'Страница успешно добавлена');
-
-            return $response
-                ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => (string)$id]))
-                ->withStatus(302);
         } catch (InvalidArgumentException $e) {
             $this->flash->addMessage('danger', 'Некорректный URL');
-
             return $this->view->render(
                 $response->withStatus(422),
                 'urls/error.twig',
@@ -133,6 +117,21 @@ class UrlController
                 ]
             );
         }
+
+        $existingUrl = $this->urlService->findByName($normalizedUrl);
+        if ($existingUrl) {
+            $this->flash->addMessage('info', 'Страница уже существует');
+            return $response
+                ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => (string)$existingUrl['id']]))
+                ->withStatus(302);
+        }
+
+        $id = $this->urlService->create($normalizedUrl);
+        $this->flash->addMessage('success', 'Страница успешно добавлена');
+
+        return $response
+            ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => (string)$id]))
+            ->withStatus(302);
     }
 
     /**
