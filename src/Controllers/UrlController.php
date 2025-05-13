@@ -141,16 +141,16 @@ class UrlController
             $this->flash->addMessage('info', 'Страница уже существует');
 
             return $this->slimResponse->withRedirect(
-                $this->routeParser->urlFor('urls.show', ['id' => (string)$existingUrl['id']]),
+                $this->routeParser->urlFor('urls.show', ['id' => (string)$existingUrl->getId()]),
                 302
             );
         }
 
-        $id = $this->urlService->create($normalizedUrl);
+        $newUrl = $this->urlService->create($normalizedUrl);
         $this->flash->addMessage('success', 'Страница успешно добавлена');
 
         return $this->slimResponse->withRedirect(
-            $this->routeParser->urlFor('urls.show', ['id' => (string)$id]),
+            $this->routeParser->urlFor('urls.show', ['id' => (string)$newUrl->getId()]),
             302
         );
     }
@@ -173,12 +173,19 @@ class UrlController
         }
 
         $checks = $this->urlService->findUrlChecks($id);
+
+        // Convert objects to arrays for the view
+        $urlData = $url->toArray();
+        $checksData = array_map(function ($check) {
+            return $check->toArray();
+        }, $checks);
+
         return $this->view->render(
             $response,
             'urls/show.twig',
             [
-                'url' => $url,
-                'checks' => $checks
+                'url' => $urlData,
+                'checks' => $checksData
             ]
         );
     }
@@ -201,7 +208,7 @@ class UrlController
         }
 
         try {
-            $this->urlCheckerService->check($id, $url['name']);
+            $this->urlCheckerService->check($id, $url->getName());
             $this->flash->addMessage('success', 'Страница успешно проверена');
         } catch (Exception $e) {
             $this->logger->error('URL check error for ID: ' . $id, $e);

@@ -15,6 +15,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Database\Database;
+use App\Models\Url;
+use App\Models\UrlCheck;
 use InvalidArgumentException;
 use PDO;
 
@@ -27,9 +29,9 @@ class UrlService
      * Find a URL by its ID
      *
      * @param int $id URL ID
-     * @return array<string, mixed>|null URL data or null if not found
+     * @return Url|null URL object or null if not found
      */
-    public function findById(int $id): ?array
+    public function findById(int $id): ?Url
     {
         $pdo = Database::getPDO();
         $stmt = $pdo->prepare('SELECT * FROM urls WHERE id = :id');
@@ -40,18 +42,16 @@ class UrlService
             return null;
         }
 
-        /** @var array<string, mixed> $result */
-        $result = $fetchedResult;
-        return $result;
+        return Url::fromArray($fetchedResult);
     }
 
     /**
      * Find a URL by its name
      *
      * @param string $name URL name
-     * @return array<string, mixed>|null URL data or null if not found
+     * @return Url|null URL object or null if not found
      */
-    public function findByName(string $name): ?array
+    public function findByName(string $name): ?Url
     {
         $pdo = Database::getPDO();
         $stmt = $pdo->prepare('SELECT * FROM urls WHERE name = :name');
@@ -62,15 +62,13 @@ class UrlService
             return null;
         }
 
-        /** @var array<string, mixed> $result */
-        $result = $fetchedResult;
-        return $result;
+        return Url::fromArray($fetchedResult);
     }
 
     /**
      * Find all URLs
      *
-     * @return array<int, array<string, mixed>> All URLs
+     * @return array<int, Url> All URLs
      */
     public function findAll(): array
     {
@@ -79,7 +77,13 @@ class UrlService
         $stmt->execute();
 
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $result;
+
+        $urls = [];
+        foreach ($result as $row) {
+            $urls[] = Url::fromArray($row);
+        }
+
+        return $urls;
     }
 
     /**
@@ -90,28 +94,31 @@ class UrlService
     public function findAllWithLatestChecks(): array
     {
         $urls = $this->findAll();
+        $urlsWithChecks = [];
 
         // Add the latest check data to each URL
-        foreach ($urls as &$url) {
-            if (isset($url['id']) && is_numeric($url['id'])) {
-                $latestCheck = $this->findLatestUrlCheck((int) $url['id']);
-                if ($latestCheck) {
-                    $url['last_check_created_at'] = $latestCheck['created_at'];
-                    $url['last_check_status_code'] = $latestCheck['status_code'];
-                }
+        foreach ($urls as $url) {
+            $urlData = $url->toArray();
+            $latestCheck = $this->findLatestUrlCheck($url->getId());
+
+            if ($latestCheck) {
+                $urlData['last_check_created_at'] = $latestCheck->getCreatedAt();
+                $urlData['last_check_status_code'] = $latestCheck->getStatusCode();
             }
+
+            $urlsWithChecks[] = $urlData;
         }
 
-        return $urls;
+        return $urlsWithChecks;
     }
 
     /**
      * Create a new URL
      *
      * @param string $name URL name
-     * @return int New URL ID
+     * @return Url New URL object
      */
-    public function create(string $name): int
+    public function create(string $name): Url
     {
         $pdo = Database::getPDO();
         $stmt = $pdo->prepare('INSERT INTO urls (name) VALUES (:name) RETURNING id');
@@ -122,14 +129,15 @@ class UrlService
             throw new \RuntimeException('Failed to create URL');
         }
 
-        return (int) $id;
+        $url = new Url($name, (int) $id);
+        return $url;
     }
 
     /**
      * Find URL checks by URL ID
      *
      * @param int $urlId URL ID
-     * @return array<int, array<string, mixed>> URL check records
+     * @return array<int, UrlCheck> URL check objects
      */
     public function findUrlChecks(int $urlId): array
     {
@@ -138,16 +146,22 @@ class UrlService
         $stmt->execute(['url_id' => $urlId]);
 
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $result;
+
+        $checks = [];
+        foreach ($result as $row) {
+            $checks[] = UrlCheck::fromArray($row);
+        }
+
+        return $checks;
     }
 
     /**
      * Find the latest URL check by URL ID
      *
      * @param int $urlId URL ID
-     * @return array<string, mixed>|null URL check data or null if not found
+     * @return UrlCheck|null URL check object or null if not found
      */
-    public function findLatestUrlCheck(int $urlId): ?array
+    public function findLatestUrlCheck(int $urlId): ?UrlCheck
     {
         $pdo = Database::getPDO();
         $stmt = $pdo->prepare('SELECT * FROM url_checks WHERE url_id = :url_id ORDER BY id DESC LIMIT 1');
@@ -158,18 +172,16 @@ class UrlService
             return null;
         }
 
-        /** @var array<string, mixed> $result */
-        $result = $fetchedResult;
-        return $result;
+        return UrlCheck::fromArray($fetchedResult);
     }
 
     /**
      * Create a new URL check
      *
-     * @param array<string, mixed> $data URL check data
-     * @return int New URL check ID
+     * @param UrlCheck $urlCheck URL check object
+     * @return UrlCheck Updated URL check object with ID
      */
-    public function createUrlCheck(array $data): int
+    public function createUrlCheck(UrlCheck $urlCheck): UrlCheck
     {
         $pdo = Database::getPDO();
         $sql = 'INSERT INTO url_checks (url_id, status_code, h1, title, description)
@@ -178,11 +190,11 @@ class UrlService
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
-            'url_id' => $data['url_id'],
-            'status_code' => $data['status_code'],
-            'h1' => $data['h1'] ?? null,
-            'title' => $data['title'] ?? null,
-            'description' => $data['description'] ?? null
+            'url_id' => $urlCheck->getUrlId(),
+            'status_code' => $urlCheck->getStatusCode(),
+            'h1' => $urlCheck->getH1(),
+            'title' => $urlCheck->getTitle(),
+            'description' => $urlCheck->getDescription()
         ]);
 
         $id = $stmt->fetchColumn();
@@ -190,7 +202,8 @@ class UrlService
             throw new \RuntimeException('Failed to create URL check');
         }
 
-        return (int) $id;
+        $urlCheck->setId((int) $id);
+        return $urlCheck;
     }
 
     /**

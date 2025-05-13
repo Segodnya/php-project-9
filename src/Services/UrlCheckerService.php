@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\UrlCheck;
 use DiDom\Document;
 use DiDom\Element;
 use Exception;
@@ -64,14 +65,17 @@ class UrlCheckerService
     {
         try {
             $checkData = $this->analyze($url);
-            $data = [
-                'url_id' => $urlId,
-                'status_code' => $checkData['status_code'],
-                'h1' => $checkData['h1'] ?? null,
-                'title' => $checkData['title'] ?? null,
-                'description' => $checkData['description'] ?? null
-            ];
-            return $this->urlService->createUrlCheck($data);
+
+            $urlCheck = new UrlCheck(
+                $urlId,
+                $checkData['status_code'],
+                $checkData['h1'] ?? null,
+                $checkData['title'] ?? null,
+                $checkData['description'] ?? null
+            );
+
+            $createdCheck = $this->urlService->createUrlCheck($urlCheck);
+            return $createdCheck->getId() ?? 0;
         } catch (Exception $e) {
             throw $e;
         }
