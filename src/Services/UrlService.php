@@ -93,17 +93,52 @@ class UrlService
      */
     public function findAllWithLatestChecks(): array
     {
-        $urls = $this->findAll();
+        $pdo = Database::getPDO();
+
+        // This query joins URLs with a subquery that selects only the latest check for each URL
+        $sql = <<<SQL
+        SELECT
+            urls.*,
+            checks.id AS check_id,
+            checks.status_code AS last_check_status_code,
+            checks.created_at AS last_check_created_at
+        FROM
+            urls
+        LEFT JOIN (
+            SELECT
+                url_id,
+                id,
+                status_code,
+                created_at
+            FROM
+                url_checks uc1
+            WHERE
+                id = (SELECT MAX(id) FROM url_checks uc2 WHERE uc2.url_id = uc1.url_id)
+        ) AS checks
+        ON
+            urls.id = checks.url_id
+        ORDER BY
+            urls.id DESC
+        SQL;
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         $urlsWithChecks = [];
+        foreach ($results as $row) {
+            $url = Url::fromArray([
+                'id' => $row['id'],
+                'name' => $row['name'],
+                'created_at' => $row['created_at']
+            ]);
 
-        // Add the latest check data to each URL
-        foreach ($urls as $url) {
             $urlData = $url->toArray();
-            $latestCheck = $this->findLatestUrlCheck($url->getId());
 
-            if ($latestCheck) {
-                $urlData['last_check_created_at'] = $latestCheck->getCreatedAt();
-                $urlData['last_check_status_code'] = $latestCheck->getStatusCode();
+            // Add check data if it exists
+            if ($row['check_id'] !== null) {
+                $urlData['last_check_created_at'] = $row['last_check_created_at'];
+                $urlData['last_check_status_code'] = $row['last_check_status_code'];
             }
 
             $urlsWithChecks[] = $urlData;
