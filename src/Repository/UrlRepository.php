@@ -163,10 +163,6 @@ class UrlRepository implements RepositoryInterface
      */
     public function create(mixed $url): Url
     {
-        if (!$url instanceof Url) {
-            throw new \InvalidArgumentException('Entity must be of type Url');
-        }
-
         $stmt = $this->pdo->prepare('INSERT INTO urls (name) VALUES (:name) RETURNING id');
         $stmt->execute(['name' => $url->getName()]);
 

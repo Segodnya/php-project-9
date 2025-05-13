@@ -125,10 +125,6 @@ class UrlCheckRepository implements RepositoryInterface
      */
     public function create(mixed $urlCheck): UrlCheck
     {
-        if (!$urlCheck instanceof UrlCheck) {
-            throw new \InvalidArgumentException('Entity must be of type UrlCheck');
-        }
-
         $sql = 'INSERT INTO url_checks (url_id, status_code, h1, title, description)
                 VALUES (:url_id, :status_code, :h1, :title, :description)
                 RETURNING id';
