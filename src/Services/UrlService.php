@@ -43,18 +43,18 @@ class UrlService
     /**
      * Constructor
      *
-     * @param UrlRepository|null $urlRepository URL repository
-     * @param UrlCheckRepository|null $urlCheckRepository URL check repository
-     * @param ValidationService|null $validationService Validation service
+     * @param UrlRepository $urlRepository URL repository
+     * @param UrlCheckRepository $urlCheckRepository URL check repository
+     * @param ValidationService $validationService Validation service
      */
     public function __construct(
-        ?UrlRepository $urlRepository = null,
-        ?UrlCheckRepository $urlCheckRepository = null,
-        ?ValidationService $validationService = null
+        UrlRepository $urlRepository,
+        UrlCheckRepository $urlCheckRepository,
+        ValidationService $validationService
     ) {
-        $this->urlRepository = $urlRepository ?? new UrlRepository();
-        $this->urlCheckRepository = $urlCheckRepository ?? new UrlCheckRepository();
-        $this->validationService = $validationService ?? new ValidationService();
+        $this->urlRepository = $urlRepository;
+        $this->urlCheckRepository = $urlCheckRepository;
+        $this->validationService = $validationService;
     }
 
     /**

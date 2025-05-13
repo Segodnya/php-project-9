@@ -14,9 +14,13 @@ declare(strict_types=1);
 
 use App\Controllers\HomeController;
 use App\Controllers\UrlController;
+use App\Database\Database;
+use App\Repository\UrlCheckRepository;
+use App\Repository\UrlRepository;
 use App\Services\LoggerService;
 use App\Services\UrlCheckerService;
 use App\Services\UrlService;
+use App\Services\ValidationService;
 use DI\Container;
 use Slim\App;
 use Slim\Flash\Messages;
@@ -27,6 +31,7 @@ use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Views\Twig;
 use Twig\TwigFunction;
+use GuzzleHttp\Client;
 
 /**
  * HTML escape function
@@ -113,6 +118,20 @@ function configureDependencies(App $app): void
         throw new \RuntimeException('Container not available');
     }
 
+    // Register PDO database connection
+    $container->set(PDO::class, function () {
+        return Database::createPDO();
+    });
+
+    // Register Repository classes
+    $container->set(UrlRepository::class, function (Container $container) {
+        return new UrlRepository($container->get(PDO::class));
+    });
+
+    $container->set(UrlCheckRepository::class, function (Container $container) {
+        return new UrlCheckRepository($container->get(PDO::class));
+    });
+
     // Register Response factory components
     $container->set(ResponseFactory::class, function () {
         return new ResponseFactory();
@@ -147,14 +166,36 @@ function configureDependencies(App $app): void
         return $app->getRouteCollector()->getRouteParser();
     });
 
+    // Register ValidationService
+    $container->set(ValidationService::class, function (Container $container) {
+        return new ValidationService();
+    });
+
     // Register URL Service
     $container->set(UrlService::class, function (Container $container) {
-        return new UrlService();
+        return new UrlService(
+            $container->get(UrlRepository::class),
+            $container->get(UrlCheckRepository::class),
+            $container->get(ValidationService::class)
+        );
+    });
+
+    // Register HTTP Client
+    $container->set(Client::class, function () {
+        return new Client([
+            'timeout' => 10,
+            'verify' => false,
+            'http_errors' => true,
+            'allow_redirects' => true
+        ]);
     });
 
     // Register URL Checker Service
     $container->set(UrlCheckerService::class, function (Container $container) {
-        return new UrlCheckerService($container->get(UrlService::class));
+        return new UrlCheckerService(
+            $container->get(UrlService::class),
+            $container->get(Client::class)
+        );
     });
 
     // Register Logger Service

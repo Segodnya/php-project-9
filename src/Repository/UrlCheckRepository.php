@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Database\Database;
 use App\Models\UrlCheck;
 use PDO;
 use RuntimeException;
@@ -31,10 +30,12 @@ class UrlCheckRepository implements RepositoryInterface
 
     /**
      * Constructor
+     *
+     * @param PDO $pdo PDO database connection
      */
-    public function __construct()
+    public function __construct(PDO $pdo)
     {
-        $this->pdo = Database::getPDO();
+        $this->pdo = $pdo;
     }
 
     /**

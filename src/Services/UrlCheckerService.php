@@ -19,6 +19,7 @@ use DiDom\Document;
 use DiDom\Element;
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 
@@ -41,16 +42,12 @@ class UrlCheckerService
      * Constructor
      *
      * @param UrlService $urlService URL service
+     * @param Client $httpClient HTTP client for making requests
      */
-    public function __construct(UrlService $urlService)
+    public function __construct(UrlService $urlService, Client $httpClient)
     {
         $this->urlService = $urlService;
-        $this->httpClient = new Client([
-            'timeout' => 10,
-            'verify' => false,
-            'http_errors' => true,
-            'allow_redirects' => true
-        ]);
+        $this->httpClient = $httpClient;
     }
 
     /**

@@ -25,18 +25,32 @@ use RuntimeException;
 class Database
 {
     /**
-     * Get PDO database connection
+     * @var PDO|null The static PDO instance (for backward compatibility)
+     */
+    private static ?PDO $instance = null;
+
+    /**
+     * Get PDO database connection (static singleton method)
      *
+     * @deprecated Use createPDO() or dependency injection instead
      * @return PDO Database connection
      */
     public static function getPDO(): PDO
     {
-        static $pdo = null;
-
-        if ($pdo !== null) {
-            return $pdo;
+        if (self::$instance === null) {
+            self::$instance = self::createPDO();
         }
 
+        return self::$instance;
+    }
+
+    /**
+     * Create a new PDO database connection
+     *
+     * @return PDO Database connection
+     */
+    public static function createPDO(): PDO
+    {
         try {
             // Check if we're in production with DATABASE_URL env var
             if (isset($_ENV['DATABASE_URL'])) {
