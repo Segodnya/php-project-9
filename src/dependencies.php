@@ -19,7 +19,11 @@ use App\Services\UrlService;
 use DI\Container;
 use Slim\App;
 use Slim\Flash\Messages;
+use Slim\Http\Factory\DecoratedResponseFactory;
+use Slim\Http\Response;
 use Slim\Interfaces\RouteParserInterface;
+use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Psr7\Factory\StreamFactory;
 use Slim\Views\Twig;
 use Twig\TwigFunction;
 
@@ -108,6 +112,27 @@ function configureDependencies(App $app): void
         throw new \RuntimeException('Container not available');
     }
 
+    // Register Response factory components
+    $container->set(ResponseFactory::class, function () {
+        return new ResponseFactory();
+    });
+
+    $container->set(StreamFactory::class, function () {
+        return new StreamFactory();
+    });
+
+    $container->set(DecoratedResponseFactory::class, function (Container $container) {
+        return new DecoratedResponseFactory(
+            $container->get(ResponseFactory::class),
+            $container->get(StreamFactory::class)
+        );
+    });
+
+    // Register HTTP Response
+    $container->set(Response::class, function (Container $container) {
+        return $container->get(DecoratedResponseFactory::class)->createResponse();
+    });
+
     // Register Flash messages
     $container->set(Messages::class, function () {
         if (session_status() === PHP_SESSION_NONE) {
@@ -175,7 +200,8 @@ function configureDependencies(App $app): void
             $container->get(UrlService::class),
             $container->get(UrlCheckerService::class),
             $container->get(Messages::class),
-            $container->get(RouteParserInterface::class)
+            $container->get(RouteParserInterface::class),
+            $container->get(Response::class)
         );
     });
 }

@@ -23,6 +23,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Flash\Messages;
 use Slim\Interfaces\RouteParserInterface;
 use Slim\Views\Twig;
+use Slim\Http\Response as SlimResponse;
 
 /**
  * UrlController class
@@ -55,6 +56,11 @@ class UrlController
     private RouteParserInterface $routeParser;
 
     /**
+     * @var SlimResponse $slimResponse
+     */
+    private SlimResponse $slimResponse;
+
+    /**
      * Constructor
      *
      * @param Twig                 $view              View renderer
@@ -62,19 +68,22 @@ class UrlController
      * @param UrlCheckerService    $urlCheckerService URL checker service
      * @param Messages             $flash             Flash messages
      * @param RouteParserInterface $routeParser       Route parser
+     * @param SlimResponse         $slimResponse      Slim HTTP Response
      */
     public function __construct(
         Twig $view,
         UrlService $urlService,
         UrlCheckerService $urlCheckerService,
         Messages $flash,
-        RouteParserInterface $routeParser
+        RouteParserInterface $routeParser,
+        SlimResponse $slimResponse
     ) {
         $this->view = $view;
         $this->urlService = $urlService;
         $this->urlCheckerService = $urlCheckerService;
         $this->flash = $flash;
         $this->routeParser = $routeParser;
+        $this->slimResponse = $slimResponse;
     }
 
     /**
@@ -121,17 +130,20 @@ class UrlController
         $existingUrl = $this->urlService->findByName($normalizedUrl);
         if ($existingUrl) {
             $this->flash->addMessage('info', 'Страница уже существует');
-            return $response
-                ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => (string)$existingUrl['id']]))
-                ->withStatus(302);
+
+            return $this->slimResponse->withRedirect(
+                $this->routeParser->urlFor('urls.show', ['id' => (string)$existingUrl['id']]),
+                302
+            );
         }
 
         $id = $this->urlService->create($normalizedUrl);
         $this->flash->addMessage('success', 'Страница успешно добавлена');
 
-        return $response
-            ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => (string)$id]))
-            ->withStatus(302);
+        return $this->slimResponse->withRedirect(
+            $this->routeParser->urlFor('urls.show', ['id' => (string)$id]),
+            302
+        );
     }
 
     /**
@@ -190,8 +202,9 @@ class UrlController
             $this->flash->addMessage('danger', 'Ошибка при проверке: ' . $e->getMessage());
         }
 
-        return $response
-            ->withHeader('Location', $this->routeParser->urlFor('urls.show', ['id' => (string)$id]))
-            ->withStatus(302);
+        return $this->slimResponse->withRedirect(
+            $this->routeParser->urlFor('urls.show', ['id' => (string)$id]),
+            302
+        );
     }
 }
