@@ -192,10 +192,6 @@ class UrlController
         }
 
         try {
-            if (!isset($url['name']) || !is_string($url['name'])) {
-                throw new Exception('Invalid URL data: missing name');
-            }
-
             $this->urlCheckerService->check($id, $url['name']);
             $this->flash->addMessage('success', 'Страница успешно проверена');
         } catch (Exception $e) {
