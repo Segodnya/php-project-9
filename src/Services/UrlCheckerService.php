@@ -148,8 +148,6 @@ class UrlCheckerService
                 $message = "Ошибка при запросе (код {$statusCode}): " . $e->getMessage();
             }
             throw new Exception($message, 0, $e);
-        } catch (Exception $e) {
-            throw new Exception('Произошла ошибка: ' . $e->getMessage());
         }
     }
 }
