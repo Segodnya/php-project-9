@@ -15,9 +15,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Url;
-use App\Models\UrlCheck;
 use App\Repository\UrlRepository;
-use App\Repository\UrlCheckRepository;
 use App\Validators\UrlValidator;
 use InvalidArgumentException;
 
@@ -32,11 +30,6 @@ class UrlService
     private UrlRepository $urlRepository;
 
     /**
-     * @var UrlCheckRepository
-     */
-    private UrlCheckRepository $urlCheckRepository;
-
-    /**
      * @var UrlValidator
      */
     private UrlValidator $urlValidator;
@@ -45,16 +38,13 @@ class UrlService
      * Constructor
      *
      * @param UrlRepository $urlRepository URL repository
-     * @param UrlCheckRepository $urlCheckRepository URL check repository
      * @param UrlValidator $urlValidator URL validator
      */
     public function __construct(
         UrlRepository $urlRepository,
-        UrlCheckRepository $urlCheckRepository,
         UrlValidator $urlValidator
     ) {
         $this->urlRepository = $urlRepository;
-        $this->urlCheckRepository = $urlCheckRepository;
         $this->urlValidator = $urlValidator;
     }
 
@@ -121,39 +111,6 @@ class UrlService
         // Create new URL object and persist it
         $urlModel = new Url($normalizedUrl);
         return $this->urlRepository->create($urlModel);
-    }
-
-    /**
-     * Find URL checks by URL ID
-     *
-     * @param int $urlId URL ID
-     * @return array<int, UrlCheck> URL check objects
-     */
-    public function findUrlChecks(int $urlId): array
-    {
-        return $this->urlCheckRepository->findByUrlId($urlId);
-    }
-
-    /**
-     * Find the latest URL check by URL ID
-     *
-     * @param int $urlId URL ID
-     * @return UrlCheck|null URL check object or null if not found
-     */
-    public function findLatestUrlCheck(int $urlId): ?UrlCheck
-    {
-        return $this->urlCheckRepository->findLatestByUrlId($urlId);
-    }
-
-    /**
-     * Create a new URL check
-     *
-     * @param UrlCheck $urlCheck URL check object
-     * @return UrlCheck Updated URL check object with ID
-     */
-    public function createUrlCheck(UrlCheck $urlCheck): UrlCheck
-    {
-        return $this->urlCheckRepository->create($urlCheck);
     }
 
     /**

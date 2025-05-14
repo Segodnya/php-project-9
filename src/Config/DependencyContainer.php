@@ -22,7 +22,7 @@ use App\Repository\UrlRepository;
 use App\Services\LoggerService;
 use App\Services\UrlCheckerService;
 use App\Services\UrlService;
-use App\Services\ValidationService;
+use App\Validators\UrlValidator;
 use App\Utils\HtmlHelpers;
 use DI\Container;
 use PDO;
@@ -105,17 +105,33 @@ class DependencyContainer
             return $app->getRouteCollector()->getRouteParser();
         });
 
-        // Register ValidationService
-        $container->set(ValidationService::class, function (Container $container) {
-            return new ValidationService();
+        // Register URL Validator
+        $container->set(UrlValidator::class, function () {
+            return new UrlValidator();
+        });
+
+        // Register Logger Service
+        $container->set(LoggerService::class, function () {
+            $logPath = null;
+
+            // Define a custom log path for production environment
+            if (($_ENV['APP_ENV'] ?? 'development') === 'production') {
+                $logDir = dirname(__DIR__, 2) . '/logs';
+                // Create logs directory if it doesn't exist
+                if (!is_dir($logDir) && !mkdir($logDir, 0755, true) && !is_dir($logDir)) {
+                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $logDir));
+                }
+                $logPath = "{$logDir}/app.log";
+            }
+
+            return new LoggerService($logPath);
         });
 
         // Register URL Service
         $container->set(UrlService::class, function (Container $container) {
             return new UrlService(
                 $container->get(UrlRepository::class),
-                $container->get(UrlCheckRepository::class),
-                $container->get(ValidationService::class)
+                $container->get(UrlValidator::class)
             );
         });
 
@@ -132,26 +148,10 @@ class DependencyContainer
         // Register URL Checker Service
         $container->set(UrlCheckerService::class, function (Container $container) {
             return new UrlCheckerService(
-                $container->get(UrlService::class),
-                $container->get(Client::class)
+                $container->get(UrlCheckRepository::class),
+                $container->get(Client::class),
+                $container->get(LoggerService::class)
             );
-        });
-
-        // Register Logger Service
-        $container->set(LoggerService::class, function (Container $container) {
-            $logPath = null;
-
-            // Define a custom log path for production environment
-            if (($_ENV['APP_ENV'] ?? 'development') === 'production') {
-                $logDir = dirname(__DIR__, 2) . '/logs';
-                // Create logs directory if it doesn't exist
-                if (!is_dir($logDir) && !mkdir($logDir, 0755, true) && !is_dir($logDir)) {
-                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $logDir));
-                }
-                $logPath = "{$logDir}/app.log";
-            }
-
-            return new LoggerService($logPath);
         });
 
         // Register Twig View Renderer

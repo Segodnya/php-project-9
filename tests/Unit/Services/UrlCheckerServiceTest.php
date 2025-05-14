@@ -3,9 +3,10 @@
 namespace Tests\Unit\Services;
 
 use App\Models\UrlCheck;
-use App\Services\HtmlParserService;
+use App\Repository\UrlCheckRepository;
+use App\Services\LoggerService;
 use App\Services\UrlCheckerService;
-use App\Services\UrlService;
+use DiDom\Document;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
@@ -17,28 +18,28 @@ use Psr\Http\Message\ResponseInterface;
 
 class UrlCheckerServiceTest extends TestCase
 {
-    /** @var UrlService&MockObject */
-    private $urlServiceMock;
+    /** @var UrlCheckRepository&MockObject */
+    private $urlCheckRepositoryMock;
 
     /** @var Client&MockObject */
     private $httpClientMock;
 
-    /** @var HtmlParserService&MockObject */
-    private $htmlParserMock;
+    /** @var LoggerService&MockObject */
+    private $loggerMock;
 
     /** @var UrlCheckerService */
     private $urlChecker;
 
     protected function setUp(): void
     {
-        $this->urlServiceMock = $this->createMock(UrlService::class);
+        $this->urlCheckRepositoryMock = $this->createMock(UrlCheckRepository::class);
         $this->httpClientMock = $this->createMock(Client::class);
-        $this->htmlParserMock = $this->createMock(HtmlParserService::class);
+        $this->loggerMock = $this->createMock(LoggerService::class);
 
         $this->urlChecker = new UrlCheckerService(
-            $this->urlServiceMock,
+            $this->urlCheckRepositoryMock,
             $this->httpClientMock,
-            $this->htmlParserMock
+            $this->loggerMock
         );
     }
 
@@ -47,11 +48,6 @@ class UrlCheckerServiceTest extends TestCase
         $urlId = 123;
         $url = 'https://example.com';
         $html = '<html><head><title>Example</title></head><body><h1>Example Domain</h1></body></html>';
-        $parsedData = [
-            'h1' => 'Example Domain',
-            'title' => 'Example',
-            'description' => null
-        ];
 
         // HTTP client mock returns successful response
         $response = new Response(200, [], $html);
@@ -60,25 +56,20 @@ class UrlCheckerServiceTest extends TestCase
             ->with($url)
             ->willReturn($response);
 
-        // HTML parser mock returns parsed data
-        $this->htmlParserMock->expects($this->once())
-            ->method('parse')
-            ->with($html)
-            ->willReturn($parsedData);
+        // Expect creating a check in repository
+        $this->urlCheckRepositoryMock->expects($this->once())
+            ->method('create')
+            ->willReturnCallback(function (UrlCheck $urlCheck) use ($urlId) {
+                $this->assertEquals($urlId, $urlCheck->getUrlId());
+                $this->assertEquals(200, $urlCheck->getStatusCode());
+                $this->assertEquals('Example Domain', $urlCheck->getH1());
+                $this->assertEquals('Example', $urlCheck->getTitle());
+                $this->assertNull($urlCheck->getDescription());
 
-        // Mock URL service creating a check
-        $urlCheck = new UrlCheck(
-            $urlId,
-            200,
-            'Example Domain',
-            'Example',
-            null,
-            456 // ID of created check
-        );
-
-        $this->urlServiceMock->expects($this->once())
-            ->method('createUrlCheck')
-            ->willReturn($urlCheck);
+                // Set ID and return the check
+                $urlCheck->setId(456);
+                return $urlCheck;
+            });
 
         // Run the check
         $result = $this->urlChecker->check($urlId, $url);
@@ -99,23 +90,20 @@ class UrlCheckerServiceTest extends TestCase
             ->with($url)
             ->willReturn($response);
 
-        // HTML parser should not be called for error responses
-        $this->htmlParserMock->expects($this->never())
-            ->method('parse');
+        // Expect creating a check in repository with error status
+        $this->urlCheckRepositoryMock->expects($this->once())
+            ->method('create')
+            ->willReturnCallback(function (UrlCheck $urlCheck) use ($urlId) {
+                $this->assertEquals($urlId, $urlCheck->getUrlId());
+                $this->assertEquals(404, $urlCheck->getStatusCode());
+                $this->assertNull($urlCheck->getH1());
+                $this->assertNull($urlCheck->getTitle());
+                $this->assertNull($urlCheck->getDescription());
 
-        // Mock URL service creating a check
-        $urlCheck = new UrlCheck(
-            $urlId,
-            404,
-            null,
-            null,
-            null,
-            456 // ID of created check
-        );
-
-        $this->urlServiceMock->expects($this->once())
-            ->method('createUrlCheck')
-            ->willReturn($urlCheck);
+                // Set ID and return the check
+                $urlCheck->setId(456);
+                return $urlCheck;
+            });
 
         // Run the check
         $result = $this->urlChecker->check($urlId, $url);
@@ -138,13 +126,14 @@ class UrlCheckerServiceTest extends TestCase
             ->with($url)
             ->willThrowException($exception);
 
-        // HTML parser should not be called when connection fails
-        $this->htmlParserMock->expects($this->never())
-            ->method('parse');
+        // Logger should record the error
+        $this->loggerMock->expects($this->once())
+            ->method('error')
+            ->with($this->stringContains('Error checking URL'), $this->isInstanceOf(\Exception::class));
 
-        // URL service should not be called
-        $this->urlServiceMock->expects($this->never())
-            ->method('createUrlCheck');
+        // Repository should not be called
+        $this->urlCheckRepositoryMock->expects($this->never())
+            ->method('create');
 
         // Expect an exception to be thrown
         $this->expectException(\Exception::class);
@@ -169,28 +158,58 @@ class UrlCheckerServiceTest extends TestCase
             ->with($url)
             ->willThrowException($exception);
 
-        // HTML parser should not be called for error responses
-        $this->htmlParserMock->expects($this->never())
-            ->method('parse');
+        // Expect creating a check in repository with error status
+        $this->urlCheckRepositoryMock->expects($this->once())
+            ->method('create')
+            ->willReturnCallback(function (UrlCheck $urlCheck) use ($urlId) {
+                $this->assertEquals($urlId, $urlCheck->getUrlId());
+                $this->assertEquals(503, $urlCheck->getStatusCode());
+                $this->assertNull($urlCheck->getH1());
+                $this->assertNull($urlCheck->getTitle());
+                $this->assertNull($urlCheck->getDescription());
 
-        // Mock URL service creating a check with error status code
-        $urlCheck = new UrlCheck(
-            $urlId,
-            503,
-            null,
-            null,
-            null,
-            456 // ID of created check
-        );
-
-        $this->urlServiceMock->expects($this->once())
-            ->method('createUrlCheck')
-            ->willReturn($urlCheck);
+                // Set ID and return the check
+                $urlCheck->setId(456);
+                return $urlCheck;
+            });
 
         // Run the check
         $result = $this->urlChecker->check($urlId, $url);
 
         // Verify expected ID is returned
         $this->assertEquals(456, $result);
+    }
+
+    public function testFindUrlChecks(): void
+    {
+        $urlId = 123;
+        $expectedChecks = [
+            new UrlCheck($urlId, 200, 'Test H1', 'Test Title', 'Test Description', 1),
+            new UrlCheck($urlId, 200, 'Test H1 2', 'Test Title 2', 'Test Description 2', 2)
+        ];
+
+        $this->urlCheckRepositoryMock->expects($this->once())
+            ->method('findByUrlId')
+            ->with($urlId)
+            ->willReturn($expectedChecks);
+
+        $result = $this->urlChecker->findUrlChecks($urlId);
+
+        $this->assertSame($expectedChecks, $result);
+    }
+
+    public function testFindLatestUrlCheck(): void
+    {
+        $urlId = 123;
+        $expectedCheck = new UrlCheck($urlId, 200, 'Test H1', 'Test Title', 'Test Description', 1);
+
+        $this->urlCheckRepositoryMock->expects($this->once())
+            ->method('findLatestByUrlId')
+            ->with($urlId)
+            ->willReturn($expectedCheck);
+
+        $result = $this->urlChecker->findLatestUrlCheck($urlId);
+
+        $this->assertSame($expectedCheck, $result);
     }
 }

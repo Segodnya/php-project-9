@@ -172,7 +172,7 @@ class UrlController
             return $this->view->render($response->withStatus(404), 'errors/404.twig');
         }
 
-        $checks = $this->urlService->findUrlChecks($id);
+        $checks = $this->urlCheckerService->findUrlChecks($id);
 
         // Convert objects to arrays for the view
         $urlData = $url->toArray();
