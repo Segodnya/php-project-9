@@ -21,6 +21,7 @@ use App\Services\LoggerService;
 use App\Services\UrlCheckerService;
 use App\Services\UrlService;
 use App\Services\ValidationService;
+use App\Utils\HtmlHelpers;
 use DI\Container;
 use Slim\App;
 use Slim\Flash\Messages;
@@ -32,75 +33,6 @@ use Slim\Psr7\Factory\StreamFactory;
 use Slim\Views\Twig;
 use Twig\TwigFunction;
 use GuzzleHttp\Client;
-
-/**
- * HTML escape function
- *
- * @param mixed $text Text to escape
- * @return string HTML escaped text
- */
-function escapeHtml(mixed $text): string
-{
-    // Handle null values
-    if ($text === null) {
-        return '';
-    }
-
-    // Convert non-string inputs to string before passing to htmlspecialchars
-    if (!is_string($text)) {
-        // Convert different types appropriately
-        if (is_bool($text)) {
-            return $text ? 'true' : 'false';
-        } elseif (is_array($text) || is_object($text)) {
-            // For arrays and objects, use json_encode for a safer representation
-            $encodedText = json_encode($text);
-            return htmlspecialchars($encodedText !== false ? $encodedText : '[Uncoded value]', ENT_QUOTES, 'UTF-8');
-        } elseif (is_int($text) || is_float($text)) {
-            // For numeric types, use string representation
-            return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
-        } else {
-            // For any other type, fallback to an empty string
-            return '';
-        }
-    }
-
-    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
-}
-
-/**
- * Format a date string
- *
- * @param string $date Date string
- * @return string Formatted date
- */
-function formatDate(string $date): string
-{
-    if (empty($date)) {
-        return 'Invalid date';
-    }
-
-    $timestamp = strtotime($date);
-    if ($timestamp === false) {
-        return 'Invalid date';
-    }
-    return date('Y-m-d H:i:s', $timestamp);
-}
-
-/**
- * Get a status badge HTML for a status code
- *
- * @param int $statusCode HTTP status code
- * @return string HTML for the badge
- */
-function getStatusBadge(int $statusCode): string
-{
-    return match (true) {
-        $statusCode >= 200 && $statusCode < 300 => "<span class=\"badge bg-success\">{$statusCode}</span>",
-        $statusCode >= 300 && $statusCode < 400 => "<span class=\"badge bg-info\">{$statusCode}</span>",
-        $statusCode >= 400 && $statusCode < 500 => "<span class=\"badge bg-warning\">{$statusCode}</span>",
-        default => "<span class=\"badge bg-danger\">{$statusCode}</span>",
-    };
-}
 
 /**
  * Configure application dependencies
@@ -227,17 +159,17 @@ function configureDependencies(App $app): void
             'debug' => $isProduction ? false : true
         ]);
 
-        // Register global helper functions
+        // Register global helper functions from Utils namespace
         $twig->getEnvironment()->addFunction(
-            new TwigFunction('h', 'escapeHtml', ['is_safe' => ['html']])
+            new TwigFunction('h', [HtmlHelpers::class, 'escapeHtml'], ['is_safe' => ['html']])
         );
 
         $twig->getEnvironment()->addFunction(
-            new TwigFunction('formatDate', fn($date) => formatDate($date))
+            new TwigFunction('formatDate', [HtmlHelpers::class, 'formatDate'])
         );
 
         $twig->getEnvironment()->addFunction(
-            new TwigFunction('getStatusBadge', fn($statusCode) => getStatusBadge($statusCode), ['is_safe' => ['html']])
+            new TwigFunction('getStatusBadge', [HtmlHelpers::class, 'getStatusBadge'], ['is_safe' => ['html']])
         );
 
         // Add flash messages to all views
