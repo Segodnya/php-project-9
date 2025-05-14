@@ -97,9 +97,6 @@ class DependencyContainer
 
         // Register Flash messages
         $container->set(Messages::class, function () {
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
             return new Messages();
         });
 
