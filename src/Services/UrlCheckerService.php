@@ -15,11 +15,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\UrlCheck;
-use DiDom\Document;
-use DiDom\Element;
 use Exception;
 use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 
@@ -39,15 +36,25 @@ class UrlCheckerService
     private Client $httpClient;
 
     /**
+     * @var HtmlParserService $htmlParser
+     */
+    private HtmlParserService $htmlParser;
+
+    /**
      * Constructor
      *
      * @param UrlService $urlService URL service
      * @param Client $httpClient HTTP client for making requests
+     * @param HtmlParserService $htmlParser HTML parser service
      */
-    public function __construct(UrlService $urlService, Client $httpClient)
-    {
+    public function __construct(
+        UrlService $urlService,
+        Client $httpClient,
+        HtmlParserService $htmlParser
+    ) {
         $this->urlService = $urlService;
         $this->httpClient = $httpClient;
+        $this->htmlParser = $htmlParser;
     }
 
     /**
@@ -61,14 +68,21 @@ class UrlCheckerService
     public function check(int $urlId, string $url): int
     {
         try {
-            $checkData = $this->analyze($url);
+            $response = $this->fetchUrl($url);
+            $statusCode = $response['status_code'];
+
+            $htmlData = [];
+            // Only parse HTML if we have a successful response
+            if ($statusCode === 200 && !empty($response['body'])) {
+                $htmlData = $this->htmlParser->parse($response['body']);
+            }
 
             $urlCheck = new UrlCheck(
                 $urlId,
-                $checkData['status_code'],
-                $checkData['h1'] ?? null,
-                $checkData['title'] ?? null,
-                $checkData['description'] ?? null
+                $statusCode,
+                $htmlData['h1'] ?? null,
+                $htmlData['title'] ?? null,
+                $htmlData['description'] ?? null
             );
 
             $createdCheck = $this->urlService->createUrlCheck($urlCheck);
@@ -79,74 +93,37 @@ class UrlCheckerService
     }
 
     /**
-     * Analyze a URL by fetching and parsing its content
+     * Fetch a URL and return the response
      *
-     * @param string $url URL to analyze
-     * @return array<string, mixed> Analysis result data
+     * @param string $url URL to fetch
+     * @return array<string, mixed> Response data including status code and body
      * @throws Exception on error
      */
-    private function analyze(string $url): array
+    private function fetchUrl(string $url): array
     {
         try {
             $response = $this->httpClient->get($url);
-            $statusCode = $response->getStatusCode();
 
-            $result = [
-                'status_code' => $statusCode
+            return [
+                'status_code' => $response->getStatusCode(),
+                'body' => (string) $response->getBody()
             ];
-
-            if ($statusCode === 200) {
-                $body = (string) $response->getBody();
-
-                // Skip parsing if body is empty
-                if (!empty($body)) {
-                    try {
-                        $document = new Document($body);
-
-                        // Extract h1 tag content
-                        $h1Element = $document->first('h1');
-                        // Use a safer approach with explicit null checking
-                        $result['h1'] = null;
-                        if ($h1Element instanceof Element) {
-                            $result['h1'] = trim($h1Element->innerHtml());
-                        }
-
-                        // Extract title tag content
-                        $titleElement = $document->first('title');
-                        // Use a safer approach with explicit null checking
-                        $result['title'] = null;
-                        if ($titleElement instanceof Element) {
-                            $result['title'] = trim($titleElement->innerHtml());
-                        }
-
-                        // Extract meta description content
-                        $descElement = $document->first('meta[name="description"]');
-                        $result['description'] = $descElement
-                            ? $descElement->getAttribute('content')
-                            : null;
-                    } catch (Exception $e) {
-                        // Log parsing error but continue
-                        error_log('HTML parsing error: ' . $e->getMessage());
-                    }
-                }
-            }
-
-            return $result;
         } catch (ConnectException $e) {
             throw new Exception('Не удалось подключиться к сайту');
         } catch (RequestException $e) {
-            // Check if a response is available before trying to get status code
-            $statusCode = null;
             $response = $e->getResponse();
-            if ($response !== null) {
-                $statusCode = $response->getStatusCode();
+            $statusCode = $response ? $response->getStatusCode() : null;
+
+            if ($response) {
+                // We got a response with an error status code
+                return [
+                    'status_code' => $statusCode,
+                    'body' => ''
+                ];
             }
 
-            // Include status code in the message instead of as a separate parameter
-            $message = 'Ошибка при запросе: ' . $e->getMessage();
-            if ($statusCode) {
-                $message = "Ошибка при запросе (код {$statusCode}): " . $e->getMessage();
-            }
+            // No response available, rethrow with a clear message
+            $message = "Ошибка при запросе: {$e->getMessage()}";
             throw new Exception($message, 0, $e);
         }
     }

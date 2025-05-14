@@ -8,6 +8,11 @@
       "App\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
   "authors": [
     {
       "name": "Hexlet"
@@ -34,6 +39,7 @@
   },
   "scripts": {
     "phpcs": "phpcs",
-    "phpstan": "phpstan --memory-limit=256M --ansi analyse -c ./phpstan.neon"
+    "phpstan": "phpstan --memory-limit=256M --ansi analyse -c ./phpstan.neon",
+    "test": "phpunit"
   }
 }

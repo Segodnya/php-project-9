@@ -44,8 +44,11 @@ lint-fix:
 phpstan:
 	PHP_MEMORY_LIMIT=256M vendor/bin/phpstan analyse -c phpstan.neon
 
+test:
+	vendor/bin/phpunit
+
 # Run all code quality checks
-check: lint phpstan
+check: lint phpstan test
 
 # Create and connect to the test database
 db-check:
