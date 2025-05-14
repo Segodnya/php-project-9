@@ -6,7 +6,6 @@ use App\Models\UrlCheck;
 use App\Repository\UrlCheckRepository;
 use App\Services\LogService;
 use App\Services\UrlCheckService;
-use DiDom\Document;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
@@ -14,9 +13,8 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
 
-class UrlCheckerServiceTest extends TestCase
+class UrlCheckServiceTest extends TestCase
 {
     /** @var UrlCheckRepository&MockObject */
     private $urlCheckRepositoryMock;
