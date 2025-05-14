@@ -18,6 +18,7 @@ use App\Models\Url;
 use App\Models\UrlCheck;
 use App\Repository\UrlRepository;
 use App\Repository\UrlCheckRepository;
+use App\Validators\UrlValidator;
 use InvalidArgumentException;
 
 /**
@@ -36,25 +37,25 @@ class UrlService
     private UrlCheckRepository $urlCheckRepository;
 
     /**
-     * @var ValidationService
+     * @var UrlValidator
      */
-    private ValidationService $validationService;
+    private UrlValidator $urlValidator;
 
     /**
      * Constructor
      *
      * @param UrlRepository $urlRepository URL repository
      * @param UrlCheckRepository $urlCheckRepository URL check repository
-     * @param ValidationService $validationService Validation service
+     * @param UrlValidator $urlValidator URL validator
      */
     public function __construct(
         UrlRepository $urlRepository,
         UrlCheckRepository $urlCheckRepository,
-        ValidationService $validationService
+        UrlValidator $urlValidator
     ) {
         $this->urlRepository = $urlRepository;
         $this->urlCheckRepository = $urlCheckRepository;
-        $this->validationService = $validationService;
+        $this->urlValidator = $urlValidator;
     }
 
     /**
@@ -109,7 +110,7 @@ class UrlService
     public function create(string $url): Url
     {
         // Validate and normalize the URL
-        $normalizedUrl = $this->validationService->validateUrl($url);
+        $normalizedUrl = $this->urlValidator->validateUrl($url);
 
         // Check if URL already exists
         $existingUrl = $this->findByName($normalizedUrl);
@@ -164,6 +165,6 @@ class UrlService
      */
     public function validateUrl(string $url): string
     {
-        return $this->validationService->validateUrl($url);
+        return $this->urlValidator->validateUrl($url);
     }
 }
