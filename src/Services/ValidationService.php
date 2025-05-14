@@ -96,7 +96,7 @@ class ValidationService
         }
 
         // Normalize to scheme://host
-        $normalizedUrl = $scheme . '://' . $host;
+        $normalizedUrl = "{$scheme}://{$host}";
 
         // Add port if specified and not default
         if (isset($parsedUrl['port'])) {
@@ -104,7 +104,7 @@ class ValidationService
                 ($scheme === 'http' && $parsedUrl['port'] !== 80) ||
                 ($scheme === 'https' && $parsedUrl['port'] !== 443)
             ) {
-                $normalizedUrl .= ':' . $parsedUrl['port'];
+                $normalizedUrl .= ":{$parsedUrl['port']}";
             }
         }
 

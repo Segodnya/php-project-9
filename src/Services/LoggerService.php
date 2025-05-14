@@ -47,9 +47,9 @@ class LoggerService
         $logMessage = "[ERROR] {$message}";
 
         if ($e !== null) {
-            $logMessage .= "\nException: " . $e->getMessage();
-            $logMessage .= "\nFile: " . $e->getFile() . " (Line: " . $e->getLine() . ")";
-            $logMessage .= "\nStack Trace: " . $e->getTraceAsString();
+            $logMessage .= "\nException: {$e->getMessage()}";
+            $logMessage .= "\nFile: {$e->getFile()} (Line: {$e->getLine()})";
+            $logMessage .= "\nStack Trace: {$e->getTraceAsString()}";
         }
 
         $this->log($logMessage);

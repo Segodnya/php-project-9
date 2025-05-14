@@ -148,7 +148,7 @@ class DependencyContainer
                 if (!is_dir($logDir) && !mkdir($logDir, 0755, true) && !is_dir($logDir)) {
                     throw new \RuntimeException(sprintf('Directory "%s" was not created', $logDir));
                 }
-                $logPath = $logDir . '/app.log';
+                $logPath = "{$logDir}/app.log";
             }
 
             return new LoggerService($logPath);

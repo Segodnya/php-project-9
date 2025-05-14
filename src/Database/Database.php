@@ -108,16 +108,16 @@ class Database
                             // Execute the SQL statements - PostgreSQL can handle the script as is
                             $pdo->exec($sql);
                         } else {
-                            throw new RuntimeException('Failed to read database SQL file: ' . $sqlPath);
+                            throw new RuntimeException("Failed to read database SQL file: {$sqlPath}");
                         }
                     } else {
-                        throw new RuntimeException('Database SQL file not found: ' . $sqlPath);
+                        throw new RuntimeException("Database SQL file not found: {$sqlPath}");
                     }
                 } catch (PDOException $migrationException) {
                     // If tables already exist, we'll get an error but that's fine
                     // Log the error if in development mode
                     if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
-                        error_log('Migration error (can be ignored if tables exist): ' . $migrationException->getMessage());
+                        error_log("Migration error (can be ignored if tables exist): {$migrationException->getMessage()}");
                     }
                 }
             } else {
@@ -154,10 +154,10 @@ class Database
                             // Execute the SQL statements
                             $pdo->exec($sql);
                         } else {
-                            throw new RuntimeException('Failed to read database SQL file: ' . $sqlPath);
+                            throw new RuntimeException("Failed to read database SQL file: {$sqlPath}");
                         }
                     } else {
-                        throw new RuntimeException('Database SQL file not found: ' . $sqlPath);
+                        throw new RuntimeException("Database SQL file not found: {$sqlPath}");
                     }
                 }
             }
@@ -167,7 +167,7 @@ class Database
             return $pdo;
         } catch (PDOException $e) {
             // Simple error handling
-            die('Database connection failed: ' . $e->getMessage());
+            die("Database connection failed: {$e->getMessage()}");
         }
     }
 }

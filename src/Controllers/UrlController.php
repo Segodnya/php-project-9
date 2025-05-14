@@ -211,7 +211,7 @@ class UrlController
             $this->urlCheckerService->check($id, $url->getName());
             $this->flash->addMessage('success', 'Страница успешно проверена');
         } catch (Exception $e) {
-            $this->logger->error('URL check error for ID: ' . $id, $e);
+            $this->logger->error("URL check error for ID: {$id}", $e);
 
             $this->flash->addMessage('danger', 'Произошла ошибка при проверке страницы');
         }
