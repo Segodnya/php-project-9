@@ -15,8 +15,8 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Services\UrlService;
-use App\Services\UrlCheckerService;
-use App\Services\LoggerService;
+use App\Services\UrlCheckService;
+use App\Services\LogService;
 use Exception;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -42,9 +42,9 @@ class UrlController
     private UrlService $urlService;
 
     /**
-     * @var UrlCheckerService $urlCheckerService
+     * @var UrlCheckService $urlCheckerService
      */
-    private UrlCheckerService $urlCheckerService;
+    private UrlCheckService $urlCheckerService;
 
     /**
      * @var Messages $flash
@@ -62,29 +62,29 @@ class UrlController
     private SlimResponse $slimResponse;
 
     /**
-     * @var LoggerService $logger
+     * @var LogService $logger
      */
-    private LoggerService $logger;
+    private LogService $logger;
 
     /**
      * Constructor
      *
      * @param Twig                 $view              View renderer
      * @param UrlService           $urlService        URL service
-     * @param UrlCheckerService    $urlCheckerService URL checker service
+     * @param UrlCheckService    $urlCheckerService URL checker service
      * @param Messages             $flash             Flash messages
      * @param RouteParserInterface $routeParser       Route parser
      * @param SlimResponse         $slimResponse      Slim HTTP Response
-     * @param LoggerService        $logger            Logger service
+     * @param LogService        $logger            Logger service
      */
     public function __construct(
         Twig $view,
         UrlService $urlService,
-        UrlCheckerService $urlCheckerService,
+        UrlCheckService $urlCheckerService,
         Messages $flash,
         RouteParserInterface $routeParser,
         SlimResponse $slimResponse,
-        LoggerService $logger
+        LogService $logger
     ) {
         $this->view = $view;
         $this->urlService = $urlService;

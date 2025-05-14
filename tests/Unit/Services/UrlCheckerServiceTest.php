@@ -4,8 +4,8 @@ namespace Tests\Unit\Services;
 
 use App\Models\UrlCheck;
 use App\Repository\UrlCheckRepository;
-use App\Services\LoggerService;
-use App\Services\UrlCheckerService;
+use App\Services\LogService;
+use App\Services\UrlCheckService;
 use DiDom\Document;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
@@ -24,19 +24,19 @@ class UrlCheckerServiceTest extends TestCase
     /** @var Client&MockObject */
     private $httpClientMock;
 
-    /** @var LoggerService&MockObject */
+    /** @var LogService&MockObject */
     private $loggerMock;
 
-    /** @var UrlCheckerService */
+    /** @var UrlCheckService */
     private $urlChecker;
 
     protected function setUp(): void
     {
         $this->urlCheckRepositoryMock = $this->createMock(UrlCheckRepository::class);
         $this->httpClientMock = $this->createMock(Client::class);
-        $this->loggerMock = $this->createMock(LoggerService::class);
+        $this->loggerMock = $this->createMock(LogService::class);
 
-        $this->urlChecker = new UrlCheckerService(
+        $this->urlChecker = new UrlCheckService(
             $this->urlCheckRepositoryMock,
             $this->httpClientMock,
             $this->loggerMock

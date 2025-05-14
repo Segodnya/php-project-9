@@ -15,9 +15,9 @@ declare(strict_types=1);
 namespace App\Services;
 
 /**
- * LoggerService class for handling application logging
+ * LogService class for handling application logging
  */
-class LoggerService
+class LogService
 {
     /**
      * @var string $logFile Path to the log file

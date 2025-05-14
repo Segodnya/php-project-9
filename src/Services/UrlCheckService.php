@@ -24,9 +24,9 @@ use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 
 /**
- * UrlCheckerService class
+ * UrlCheckService class
  */
-class UrlCheckerService
+class UrlCheckService
 {
     /**
      * @var UrlCheckRepository $urlCheckRepository
@@ -39,21 +39,21 @@ class UrlCheckerService
     private Client $httpClient;
 
     /**
-     * @var LoggerService $logger
+     * @var LogService $logger
      */
-    private LoggerService $logger;
+    private LogService $logger;
 
     /**
      * Constructor
      *
      * @param UrlCheckRepository $urlCheckRepository URL check repository
      * @param Client $httpClient HTTP client for making requests
-     * @param LoggerService $logger Logger service for error handling
+     * @param LogService $logger Logger service for error handling
      */
     public function __construct(
         UrlCheckRepository $urlCheckRepository,
         Client $httpClient,
-        LoggerService $logger
+        LogService $logger
     ) {
         $this->urlCheckRepository = $urlCheckRepository;
         $this->httpClient = $httpClient;

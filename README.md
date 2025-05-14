@@ -139,7 +139,7 @@ The application implements a robust error handling approach:
    - In development: The standard PHP error log
    - In production: A dedicated app.log file in the `/logs` directory
 
-3. **Using the Logger Service**: The application provides a centralized `LoggerService` for consistent logging throughout the codebase:
+3. **Using the Logger Service**: The application provides a centralized `LogService` for consistent logging throughout the codebase:
 
 ```php
 // Example of logging an error with exception details

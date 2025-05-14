@@ -19,8 +19,8 @@ use App\Controllers\UrlController;
 use App\Database\Database;
 use App\Repository\UrlCheckRepository;
 use App\Repository\UrlRepository;
-use App\Services\LoggerService;
-use App\Services\UrlCheckerService;
+use App\Services\LogService;
+use App\Services\UrlCheckService;
 use App\Services\UrlService;
 use App\Validators\UrlValidator;
 use App\Utils\HtmlHelpers;
@@ -111,7 +111,7 @@ class DependencyContainer
         });
 
         // Register Logger Service
-        $container->set(LoggerService::class, function () {
+        $container->set(LogService::class, function () {
             $logPath = null;
 
             // Define a custom log path for production environment
@@ -124,7 +124,7 @@ class DependencyContainer
                 $logPath = "{$logDir}/app.log";
             }
 
-            return new LoggerService($logPath);
+            return new LogService($logPath);
         });
 
         // Register URL Service
@@ -146,11 +146,11 @@ class DependencyContainer
         });
 
         // Register URL Checker Service
-        $container->set(UrlCheckerService::class, function (Container $container) {
-            return new UrlCheckerService(
+        $container->set(UrlCheckService::class, function (Container $container) {
+            return new UrlCheckService(
                 $container->get(UrlCheckRepository::class),
                 $container->get(Client::class),
-                $container->get(LoggerService::class)
+                $container->get(LogService::class)
             );
         });
 
@@ -196,11 +196,11 @@ class DependencyContainer
             return new UrlController(
                 $container->get(Twig::class),
                 $container->get(UrlService::class),
-                $container->get(UrlCheckerService::class),
+                $container->get(UrlCheckService::class),
                 $container->get(Messages::class),
                 $container->get(RouteParserInterface::class),
                 $container->get(Response::class),
-                $container->get(LoggerService::class)
+                $container->get(LogService::class)
             );
         });
     }
