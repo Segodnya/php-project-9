@@ -34,25 +34,13 @@ $container = new \DI\Container();
 $app = \Slim\Factory\AppFactory::create();
 
 // Configure dependencies
-$dependenciesPath = __DIR__ . '/../src/dependencies.php';
-require_once $dependenciesPath;
-// Import the configureDependencies function
-if (!function_exists('configureDependencies')) {
-    throw new \RuntimeException('configureDependencies function not found');
-}
-configureDependencies($app);
+\App\Config\DependencyContainer::configure($app);
 
 // Add middleware
-$middlewarePath = __DIR__ . '/../src/middleware.php';
-require_once $middlewarePath;
-// Import the setupMiddleware function
-if (!function_exists('setupMiddleware')) {
-    throw new \RuntimeException('setupMiddleware function not found');
-}
-setupMiddleware($app);
+\App\Config\Middleware::setup($app);
 
 // Register routes
-require_once __DIR__ . '/../src/routes.php';
+\App\Config\Routes::register($app);
 
 // Run app
 $app->run();
