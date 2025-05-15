@@ -222,15 +222,4 @@ class UrlCheckService
     {
         return $this->urlCheckRepository->findByUrlId($urlId);
     }
-
-    /**
-     * Find the latest URL check by URL ID
-     *
-     * @param int $urlId URL ID
-     * @return UrlCheck|null URL check object or null if not found
-     */
-    public function findLatestUrlCheck(int $urlId): ?UrlCheck
-    {
-        return $this->urlCheckRepository->findLatestByUrlId($urlId);
-    }
 }

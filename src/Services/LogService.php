@@ -56,28 +56,6 @@ class LogService
     }
 
     /**
-     * Log an info message
-     *
-     * @param string $message Info message
-     * @return void
-     */
-    public function info(string $message): void
-    {
-        $this->log("[INFO] {$message}");
-    }
-
-    /**
-     * Log a warning message
-     *
-     * @param string $message Warning message
-     * @return void
-     */
-    public function warning(string $message): void
-    {
-        $this->log("[WARNING] {$message}");
-    }
-
-    /**
      * Log a message
      *
      * @param string $message Message to log

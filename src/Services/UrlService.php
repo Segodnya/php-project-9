@@ -71,16 +71,6 @@ class UrlService
     }
 
     /**
-     * Find all URLs
-     *
-     * @return array<int, Url> All URLs
-     */
-    public function findAll(): array
-    {
-        return $this->urlRepository->findAll();
-    }
-
-    /**
      * Find all URLs with their latest check data
      *
      * @return array<int, array<string, mixed>> All URLs with latest check data
