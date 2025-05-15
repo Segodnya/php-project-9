@@ -124,23 +124,27 @@ class UrlRepository
 
         // 2: Получаем последнюю проверку для каждого URL
         $placeholders = implode(',', array_fill(0, count($urlIds), '?'));
-        $checksQuery = <<<SQL
-        SELECT uc1.*
-        FROM url_checks uc1
-        INNER JOIN (
-            SELECT url_id, MAX(id) as max_id
-            FROM url_checks
-            WHERE url_id IN ({$placeholders})
-            GROUP BY url_id
-        ) uc2 ON uc1.id = uc2.max_id
-        SQL;
+        $latestCheckIdsQuery = "SELECT url_id, MAX(id) as max_id FROM url_checks WHERE url_id IN ({$placeholders}) GROUP BY url_id";
+
+        $latestCheckIdsStmt = $this->pdo->prepare($latestCheckIdsQuery);
+        $latestCheckIdsStmt->execute($urlIds);
+        $latestCheckIds = $latestCheckIdsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($latestCheckIds)) {
+            return array_values($urlsWithChecks);
+        }
+
+        // 3: Получаем детали проверки для последних ID
+        $checkIds = array_column($latestCheckIds, 'max_id');
+        $checksPlaceholders = implode(',', array_fill(0, count($checkIds), '?'));
+        $checksQuery = "SELECT * FROM url_checks WHERE id IN ({$checksPlaceholders})";
 
         $checksStmt = $this->pdo->prepare($checksQuery);
-        $checksStmt->execute($urlIds);
-        $latestChecks = $checksStmt->fetchAll(PDO::FETCH_ASSOC);
+        $checksStmt->execute($checkIds);
+        $checks = $checksStmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // 3: Мапим проверки к URL
-        foreach ($latestChecks as $check) {
+        // 4: Мапим проверки к URL
+        foreach ($checks as $check) {
             $urlId = (int) $check['url_id'];
             if (isset($urlsWithChecks[$urlId])) {
                 $urlsWithChecks[$urlId]['last_check_created_at'] = $check['created_at'];
