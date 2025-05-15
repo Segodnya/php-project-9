@@ -103,56 +103,52 @@ class UrlRepository
      */
     public function findAllWithLatestChecks(): array
     {
-        // This query joins URLs with a subquery that selects only the latest check for each URL
-        $sql = <<<SQL
-        SELECT
-            urls.*,
-            checks.id AS check_id,
-            checks.status_code AS last_check_status_code,
-            checks.created_at AS last_check_created_at
-        FROM
-            urls
-        LEFT JOIN (
-            SELECT
-                url_id,
-                id,
-                status_code,
-                created_at
-            FROM
-                url_checks uc1
-            WHERE
-                id = (SELECT MAX(id) FROM url_checks uc2 WHERE uc2.url_id = uc1.url_id)
-        ) AS checks
-        ON
-            urls.id = checks.url_id
-        ORDER BY
-            urls.id DESC
-        SQL;
+        // 1: Собрали все URL
+        $urlsStmt = $this->pdo->prepare('SELECT * FROM urls ORDER BY id DESC');
+        $urlsStmt->execute();
+        $urlsData = $urlsStmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute();
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+        // Конвертируем в объекты Url и подготавливаем результат
         $urlsWithChecks = [];
-        foreach ($results as $row) {
-            $url = Url::fromArray([
-                'id' => $row['id'],
-                'name' => $row['name'],
-                'created_at' => $row['created_at']
-            ]);
+        $urlIds = [];
 
-            $urlData = $url->toArray();
-
-            // Add check data if it exists
-            if ($row['check_id'] !== null) {
-                $urlData['last_check_created_at'] = $row['last_check_created_at'];
-                $urlData['last_check_status_code'] = $row['last_check_status_code'];
-            }
-
-            $urlsWithChecks[] = $urlData;
+        foreach ($urlsData as $urlData) {
+            $url = Url::fromArray($urlData);
+            $urlIds[] = $url->getId();
+            $urlsWithChecks[$url->getId()] = $url->toArray();
         }
 
-        return $urlsWithChecks;
+        if (empty($urlIds)) {
+            return [];
+        }
+
+        // 2: Получаем последнюю проверку для каждого URL
+        $placeholders = implode(',', array_fill(0, count($urlIds), '?'));
+        $checksQuery = <<<SQL
+        SELECT uc1.*
+        FROM url_checks uc1
+        INNER JOIN (
+            SELECT url_id, MAX(id) as max_id
+            FROM url_checks
+            WHERE url_id IN ({$placeholders})
+            GROUP BY url_id
+        ) uc2 ON uc1.id = uc2.max_id
+        SQL;
+
+        $checksStmt = $this->pdo->prepare($checksQuery);
+        $checksStmt->execute($urlIds);
+        $latestChecks = $checksStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // 3: Мапим проверки к URL
+        foreach ($latestChecks as $check) {
+            $urlId = (int) $check['url_id'];
+            if (isset($urlsWithChecks[$urlId])) {
+                $urlsWithChecks[$urlId]['last_check_created_at'] = $check['created_at'];
+                $urlsWithChecks[$urlId]['last_check_status_code'] = $check['status_code'];
+            }
+        }
+
+        return array_values($urlsWithChecks);
     }
 
     /**
