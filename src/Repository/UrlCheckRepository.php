@@ -21,7 +21,7 @@ use RuntimeException;
 /**
  * UrlCheckRepository class
  */
-class UrlCheckRepository implements RepositoryInterface
+class UrlCheckRepository
 {
     /**
      * @var PDO
